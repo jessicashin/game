@@ -27,6 +27,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.AudioClip;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -35,6 +37,10 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 public class PartOne {
+
+	private final MediaPlayer introMusic = new MediaPlayer(
+		new Media(getClass().getResource("audio/intro.mp3").toString())
+	);
 
 	// Map of entity name (String) to entity Image for entity selection
 	static final Map<String, Sprite> entityHash = new LinkedHashMap<String, Sprite>();
@@ -83,7 +89,7 @@ public class PartOne {
 
 		// ComboBox populated with all entities to select the sprite to display on click
 		ComboBox<String> spriteSelect = new ComboBox<String>();
-		spriteSelect.setPromptText("Select a sprite");
+		spriteSelect.setPromptText("Select sprite");
 		for (Map.Entry<String, Sprite> sprite : entityHash.entrySet()) {
 			spriteSelect.getItems().add(sprite.getKey());
 		}
@@ -94,22 +100,22 @@ public class PartOne {
 		scalePercentage.setAlignment(Pos.CENTER_LEFT);
 		scalePercentage.setSpacing(5);
 		TextField scaleInput = new TextField();
-		scaleInput.setPromptText("Enter the scale percentage");
+		scaleInput.setPromptText("Enter scale");
 		scaleInput.setStyle("-fx-font-family: 'Determination Sans';");
-		scaleInput.setPrefWidth(200);
+		scaleInput.setPrefWidth(100);
 		Text percentSign = new Text("%");
 		percentSign.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 16));
 		percentSign.setFill(Color.WHITE);
 		scalePercentage.getChildren().addAll(scaleInput, percentSign);
 
 		Text instructions = new Text("Click anywhere below to draw the sprite!");
-		instructions.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 16));
+		instructions.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Sans.otf"), 16));
 		instructions.setFill(Color.WHITE);
 
 		HBox form = new HBox();
 		form.getChildren().addAll(spriteSelect, scalePercentage, instructions);
-		form.setSpacing(40);
-		form.setPadding(new Insets(30, 30, 30, 30));
+		form.setSpacing(30);
+		form.setPadding(new Insets(20, 20, 15, 20));
 		form.setAlignment(Pos.CENTER);
 		form.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
 
@@ -117,6 +123,10 @@ public class PartOne {
 		Pane pane = new Pane();
 		pane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(10))));
 		pane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
+
+		introMusic.setVolume(0.6);
+		introMusic.setCycleCount(AudioClip.INDEFINITE);
+		introMusic.play();
 		AudioClip dropSoundEffect = new AudioClip(getClass().getResource("audio/bop.wav").toString());
 		AudioClip errorSoundEffect = new AudioClip(getClass().getResource("audio/error.wav").toString());
 
@@ -126,12 +136,12 @@ public class PartOne {
 			// If validation fails, flash an error message
 			if (!error.isEmpty()) {
 				StackPane errorMessage = new StackPane();
-				Rectangle errorBg = new Rectangle(600, 200);
+				Rectangle errorBg = new Rectangle(500, 200);
 				errorBg.setFill(Color.BLACK);
 				errorBg.setStroke(Color.WHITE);
 				errorBg.setStrokeWidth(5);
 				Text errorText = new Text(error);
-				errorText.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 20));
+				errorText.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 17));
 				errorText.setTextAlignment(TextAlignment.CENTER);
 				errorText.setFill(Color.WHITE);
 				errorMessage.getChildren().addAll(errorBg, errorText);
@@ -182,7 +192,7 @@ public class PartOne {
 		});
 
 		vbox.getChildren().addAll(form, pane);
-		vbox.setMinSize(900, 700);
+		vbox.setMinSize(700, 500);
 		VBox.setVgrow(pane, Priority.ALWAYS);
 
 		return vbox;

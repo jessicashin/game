@@ -24,32 +24,27 @@ public class App extends Application {
 	public void start(Stage stage) throws Exception {
 		Scene titleScene = new Scene(createTitleScreen());
 
-		MediaPlayer titleMusicPlayer = new MediaPlayer(
+		MediaPlayer titleMusic = new MediaPlayer(
 			new Media(getClass().getResource("audio/title.mp3").toString())
 		);
-		titleMusicPlayer.play();
-		titleMusicPlayer.setCycleCount(AudioClip.INDEFINITE);
-		titleMusicPlayer.setVolume(0.6);
-
-//		PartOne p1 = new PartOne();
-//		Scene partOneScene = new Scene(p1.createPartOne());
-//		partOneScene.getStylesheets().add("fxgame/fxgame.css");
-
-		MediaPlayer introMusicPlayer = new MediaPlayer(
-			new Media(getClass().getResource("audio/intro.mp3").toString())
-		);
-		introMusicPlayer.setVolume(0.6);
-		introMusicPlayer.setCycleCount(AudioClip.INDEFINITE);
+		titleMusic.play();
+		titleMusic.setCycleCount(AudioClip.INDEFINITE);
+		titleMusic.setVolume(0.6);
 
 		// Press key on title screen to proceed
 		titleScene.setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.DIGIT2) {
+
+//				PartOne p1 = new PartOne();
+//				Scene partOneScene = new Scene(p1.createPartOne());
+//				partOneScene.getStylesheets().add("fxgame/fxgame.css");
 //				stage.setScene(partOneScene);
+
 				LabEight l8= new LabEight();
 				Scene labEightScene = l8.createSpriteAnimationGame();
 				stage.setScene(labEightScene);
-				titleMusicPlayer.stop();
-				introMusicPlayer.play();
+
+				titleMusic.stop();
 			}
 		});
 
@@ -66,22 +61,22 @@ public class App extends Application {
 		// Create game title
 		StackPane titleStack = new StackPane();
 		Text titleBack = new Text("The Cooling");
-		titleBack.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/MonsterFriendBack.otf"), 60));
+		titleBack.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/MonsterFriendBack.otf"), 50));
 		titleBack.setFill(Color.WHITE);
 		titleBack.setOpacity(0.5);
 		Text titleFore = new Text("The Cooling");
-		titleFore.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/MonsterFriendFore.otf"), 60));
+		titleFore.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/MonsterFriendFore.otf"), 50));
 		titleFore.setFill(Color.WHITE);
 		titleStack.getChildren().addAll(titleBack, titleFore);
 
 		// Create subtitle instructions
 		Text subtitle = new Text("[Press 2 or ENTER to begin]");
-		subtitle.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 22));
+		subtitle.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 20));
 		subtitle.setFill(Color.LIGHTGRAY);
 
 		vbox.getChildren().addAll(titleStack, subtitle);
-		vbox.setMinSize(900, 700);
-		vbox.setSpacing(100);
+		vbox.setMinSize(700, 500);
+		vbox.setSpacing(50);
 		vbox.setAlignment(Pos.CENTER);
 		vbox.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
 

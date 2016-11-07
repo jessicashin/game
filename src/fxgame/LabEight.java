@@ -13,14 +13,21 @@ import javafx.animation.Timeline;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.media.AudioClip;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public class LabEight {
@@ -28,6 +35,7 @@ public class LabEight {
 	private static final Random RANDOM = new Random();
 
 	private final Pane pane = new Pane();
+	private final Scene scene = new Scene(pane);
 
 	private final Brinn player = new Brinn();
 	private List<Rectangle> obstacles = new ArrayList<Rectangle>();
@@ -36,6 +44,14 @@ public class LabEight {
 	private AnimationTimer animationTimer;
 	private final LongProperty lastUpdateTime = new SimpleLongProperty();
 	private Timeline timeline;
+
+	private final MediaPlayer introMusic = new MediaPlayer(
+		new Media(getClass().getResource("audio/intro.mp3").toString())
+	);
+
+	private final MediaPlayer gameOverMusic = new MediaPlayer(
+		new Media(getClass().getResource("audio/gameover.mp3").toString())
+	);
 
 	private Set<KeyCode> keysPressed = new HashSet<KeyCode>();
 
@@ -72,7 +88,6 @@ public class LabEight {
 		Rectangle skeletonCBox = new Rectangle(skeleton.getImageView().getTranslateX() + skeleton.getCBoxOffsetX(),
 				skeleton.getImageView().getTranslateY() + skeleton.getCBoxOffsetY(),
 				skeleton.getCBoxWidth(), skeleton.getCBoxHeight());
-		skeleton.setXvelocity(skeleton.getSpeed());
 		skeleton.walkRight();
 
 		sprites.add(player);
@@ -82,7 +97,9 @@ public class LabEight {
 		obstacles.add(tree1CollisionBox);
 		obstacles.add(tree2CollisionBox);
 
-		Scene scene = new Scene(pane);
+		introMusic.setVolume(0.6);
+		introMusic.setCycleCount(AudioClip.INDEFINITE);
+		introMusic.play();
 
 		animationTimer = new AnimationTimer() {
 			  @Override
@@ -122,6 +139,20 @@ public class LabEight {
 
 				  if (checkForSkeletonCollision(skeletonCBox, newX, newY)) {
 					  skeleton.getAnimation().stop();
+					  VBox gameOverMessage = createGameOverPane();
+					  pane.getChildren().add(gameOverMessage);
+					  Timeline delayRestart = new Timeline(new KeyFrame(Duration.millis(3100), event -> {
+						  scene.setOnKeyPressed(e -> {
+							  if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.DIGIT2) {
+								  pane.getChildren().remove(gameOverMessage);
+								  skeleton.getImageView().setTranslateX(100);
+								  skeleton.getImageView().setTranslateY(150);
+								  skeleton.setPos(skeleton.getImageView().getTranslateX(), skeleton.getImageView().getTranslateY());
+								  restart();
+							  }
+						  });
+					  }));
+					  delayRestart.play();
 				  }
 
 				  if (skeleton.getImageView().getTranslateX() < sOldX + sDeltaX) {
@@ -203,13 +234,19 @@ public class LabEight {
 						  }
 		            }
 		        ),
-		        new KeyFrame(
-		          Duration.seconds(2)
-		        )
+		        new KeyFrame(Duration.seconds(2))
 		    );
 		timeline.setCycleCount(Timeline.INDEFINITE);
 	    timeline.play();
 
+	    startKeyPressedEventHandler();
+		startKeyReleasedEventHandler();
+
+		return scene;
+
+	}
+
+	private void startKeyPressedEventHandler() {
 		scene.setOnKeyPressed(e -> {
 			KeyCode key = e.getCode();
 			if (key == KeyCode.UP || key == KeyCode.KP_UP) {
@@ -229,7 +266,9 @@ public class LabEight {
 				keysPressed.add(KeyCode.LEFT);
 			}
 		});
+	}
 
+	private void startKeyReleasedEventHandler() {
 		scene.setOnKeyReleased(e -> {
 			KeyCode key = e.getCode();
 			boolean up = false;
@@ -269,9 +308,6 @@ public class LabEight {
 				}
 			}
 		});
-
-		return scene;
-
 	}
 
 	private boolean checkForCollision(Sprite sprite, double newX, double newY) {
@@ -293,8 +329,14 @@ public class LabEight {
 				newX + player.getCBoxOffsetX(), newY + player.getCBoxOffsetY(),
 				player.getCBoxWidth(), player.getCBoxHeight())) {
 			collision = true;
+			AudioClip soundEffect = new AudioClip(getClass().getResource("audio/gameover.wav").toString());
+			soundEffect.play();
 			animationTimer.stop();
 			timeline.stop();
+			introMusic.stop();
+			gameOverMusic.setVolume(0.5);
+			Timeline delayedMusic = new Timeline(new KeyFrame(Duration.seconds(3), e -> gameOverMusic.play()));
+			delayedMusic.play();
 			System.out.println("GAME OVER");
 		}
 		return collision;
@@ -305,6 +347,39 @@ public class LabEight {
 		for (Sprite sprite : sprites) {
 			sprite.getImageView().toFront();
 		}
+	}
+
+	private VBox createGameOverPane() {
+		VBox vbox = new VBox();
+		Text gameOverText = new Text("game over");
+		gameOverText.setFill(Color.WHITE);
+		gameOverText.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/MonsterFriendFore.otf"), 50));
+		Text restartText = new Text("[Press 2 or ENTER to restart]");
+		restartText.setFill(Color.BLACK);
+		Timeline restartTextDelay = new Timeline(
+				new KeyFrame(Duration.seconds(3), e -> restartText.setFill(Color.LIGHTGRAY))
+		);
+		restartTextDelay.play();
+		restartText.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 20));
+		vbox.getChildren().addAll(gameOverText, restartText);
+		vbox.setSpacing(50);
+		vbox.setAlignment(Pos.CENTER);
+		vbox.setPrefSize(pane.getBoundsInParent().getWidth(), pane.getBoundsInParent().getHeight());
+		vbox.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+		return vbox;
+	}
+
+	private void restart() {
+		keysPressed.clear();
+		animationTimer.start();
+		introMusic.play();
+		timeline.play();
+		gameOverMusic.stop();
+		player.standFront();
+		player.getImageView().setTranslateX(pane.getMinWidth()/2 - player.getWidth()/2);
+		player.getImageView().setTranslateY(pane.getMinHeight()/2 - player.getHeight()/2);
+		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
+		startKeyPressedEventHandler();
 	}
 
 }
