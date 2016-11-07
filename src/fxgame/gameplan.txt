@@ -1,0 +1,98 @@
+THE COOLING DESIGN DOC
+
+The Cooling is a JavaFX RPG game with a top-down graphics perspective.
+The main character, Brinn, is a lonely survivor of a post-apocalyptic
+world consumed by the cold and the monsters that come with it. Her sole,
+beloved companion is her dog Luffy.
+
+-----------------------------------------------------------------------
+
+GAME DESIGN
+
+PLAYER: This is a single-player game (player vs. the game system).
+The player controls the main character Brinn throughout the game.
+
+OBJECTIVES: Brinn must collect food to feed herself and her dog.
+She must also fight monsters to protect herself when out collecting food.
+
+RULES: The player can move forward, backward, left, and right. The
+player must be within a small radius of a monster to attack. The
+player must dodge snowballs thrown by snowmans. Eating wintermelons and
+fish restores happiness for both Brinn and Luffy. Brinn can eat
+icemelons to increase stats.
+
+RESOURCES: Fish (caught by fishing), winterfruit (found in trees),
+icemelon (found by exploring and battling), hearts (found by battling)
+
+INFORMATION: The game will feature a map of places the player has been.
+The number of lives (hearts) will be shown at all times. Player level
+will be shown, but specific player and enemy stats will be hidden.
+
+SEQUENCING: The player will act in real-time, battling by moving around
+the landscape with arrow keys and attacking monsters on contact. There
+will also be an element of adventure as the player will have to search
+for hidden items (fruits) and find fishing holes to play a minigame of
+catching fish to eat.
+
+PLAYER INTERACTION: Since this is a single-player game, there is no player
+interaction. However, the player will interact with her dog Luffy in her
+home and battle monsters on the outside.
+
+THEME: The Cooling features a snowy post-apocalyptic world overrun with
+monsters. Brinn has to kill the monsters and collect food to take care
+of her dog Luffy.
+
+--------------------------------------------------------------------------
+
+DESIGN OF 10 ENTITIES
+
+Brinn (player)
+Brinn is controlled by the player. She can move left, right, up, and down.
+She has a level and stats that can increase by battling monsters. Brinn
+dies when her hearts run out, resulting in losing all carried items and
+returning home where she must recover.
+
+Luffy (Brinn's dog)
+Luffy is Brinn's dog. Luffy lives at home and needs to be fed. Luffy can
+eat winterfruit, fish, and icemelon.
+
+Skeleton (monster)
+The skeleton is a monster that can move left, right, up, and down. The
+player must avoid or kill skeletons to avoid losing a life. Killing
+skeletons increases experience needed to level up.
+
+Snowman (monster)
+The snowman is a monster that can move left, right, up, and down. The
+snowman will aim snowballs at the player so the player must move quickly
+to avoid getting hit and losing a life. Killing snowmans increases
+experience needed to level up.
+
+Snowball (monster weapon)
+The snowball is the projectile weapon of the snowman. Getting hit by
+a snowball subtracts a heart from the player.
+
+Heart (life and item)
+The player dies and loses all the items being carried when hearts run out.
+Monsters occasionally drop hearts when killed which can be collected to
+restore a heart. Brinn can consume a heart she is carrying at any time
+while she is not at max hearts.
+
+Tree
+A tree is static in the landscapes and the player must walk to the tree
+and search it to find any hidden winterfruit ripe for picking. New trees
+can be grown in certain spots around Brinn and Luffy's home when a
+winterfruit is planted.
+
+Winterfruit (food item and seed)
+Winterfruit was genetically engineered in a time before The Cooling to
+withstand extreme temperatures. Winterfruit can occasionally be found in
+trees. Winterfruit can be planted around the player's home to grow new trees.
+
+Fish (food item)
+Fish can be caught when the player finds a fishing rod and explores to find
+fishing holes and plays a fishing minigame. Food increases happiness.
+
+Icemelon (food item)
+Icemelon was genetically engineered in a time before The Cooling to
+provide an abundance of nutrients. These days Icemelon are hard to come by,
+but sometimes Snowmans will mysteriously drop them.

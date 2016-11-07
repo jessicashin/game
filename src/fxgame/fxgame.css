@@ -1,0 +1,27 @@
+/*
+ * Eclipse requires Web Tools Platform (WTP)
+ * to be installed to display this file
+ * without warnings
+ *
+ * http://wiki.eclipse.org/WTP_FAQ#How_do_I_install_WTP.3F
+ *
+ */
+
+@font-face {
+    font-family: Determination Sans;
+    src: url('fonts/DTM-Sans.otf');
+}
+
+@font-face {
+    font-family: Determination Mono;
+    src: url('fonts/DTM-Mono.otf');
+}
+
+@font-face {
+    font-family: Determination Sans;
+    src: url('fonts/DTM-Sans.otf');
+}
+
+.combo-box, .text-field {
+	-fx-background-color: #fff;
+}
