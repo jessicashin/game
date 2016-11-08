@@ -419,6 +419,8 @@ public class LabEight {
 		System.out.println("GAME OVER");
 		VBox gameOverMessage = createGameOverPane();
 		pane.getChildren().add(gameOverMessage);
+		gameOverMessage.prefWidthProperty().bind(pane.widthProperty());
+		gameOverMessage.prefHeightProperty().bind(pane.heightProperty());
 
 		Timeline delayRestart = new Timeline(new KeyFrame(Duration.millis(3100), event -> {
 			scene.setOnKeyPressed(e -> {
