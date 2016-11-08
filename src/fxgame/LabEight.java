@@ -38,8 +38,10 @@ public class LabEight {
 	private final Scene scene = new Scene(pane);
 
 	private final Brinn player = new Brinn();
-	private List<Rectangle> obstacles = new ArrayList<Rectangle>();
 	private List<Sprite> sprites = new ArrayList<Sprite>();
+	private List<Rectangle> obstacles = new ArrayList<Rectangle>();
+	private List<AnimSprite> monsters = new ArrayList<AnimSprite>();
+	private Rectangle monsterCBox = new Rectangle();
 
 	private AnimationTimer animationTimer;
 	private final LongProperty lastUpdateTime = new SimpleLongProperty();
@@ -64,178 +66,121 @@ public class LabEight {
 		player.getImageView().setTranslateY(pane.getMinHeight()/2 - player.getHeight()/2);
 		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
 
-		Tree tree1 = new Tree();
-		pane.getChildren().add(tree1.getImageView());
-		tree1.getImageView().setX(200);
-		tree1.getImageView().setY(150);
-		tree1.setPos(tree1.getImageView().getX(), tree1.getImageView().getY());
-		Rectangle tree1CollisionBox = new Rectangle(tree1.getImageView().getX() + tree1.getCBoxOffsetX(),
-				tree1.getImageView().getY() + tree1.getCBoxOffsetY(), tree1.getCBoxWidth(), tree1.getCBoxHeight());
-
-		Tree tree2 = new Tree();
-		pane.getChildren().add(tree2.getImageView());
-		tree2.getImageView().setX(400);
-		tree2.getImageView().setY(200);
-		tree2.setPos(tree2.getImageView().getX(), tree2.getImageView().getY());
-		Rectangle tree2CollisionBox = new Rectangle(tree2.getImageView().getX() + tree2.getCBoxOffsetX(),
-				tree2.getImageView().getY() + tree2.getCBoxOffsetY(), tree2.getCBoxWidth(), tree2.getCBoxHeight());
-
-		Skeleton skeleton = new Skeleton();
-		pane.getChildren().add(skeleton.getImageView());
-		skeleton.getImageView().setTranslateX(100);
-		skeleton.getImageView().setTranslateY(150);
-		skeleton.setPos(skeleton.getImageView().getTranslateX(), skeleton.getImageView().getTranslateY());
-		Rectangle skeletonCBox = new Rectangle(skeleton.getImageView().getTranslateX() + skeleton.getCBoxOffsetX(),
-				skeleton.getImageView().getTranslateY() + skeleton.getCBoxOffsetY(),
-				skeleton.getCBoxWidth(), skeleton.getCBoxHeight());
-		skeleton.walkRight();
-
 		sprites.add(player);
-		sprites.add(tree1);
-		sprites.add(tree2);
-		sprites.add(skeleton);
-		obstacles.add(tree1CollisionBox);
-		obstacles.add(tree2CollisionBox);
+
+		for (int i = 1; i <= 7; i++) {
+			Tree tree = new Tree();
+			pane.getChildren().add(tree.getImageView());
+			switch (i)
+			{
+			case 1: tree.getImageView().setX(200); tree.getImageView().setY(150); break;
+			case 2: tree.getImageView().setX(400); tree.getImageView().setY(200); break;
+			case 3: tree.getImageView().setX(100); tree.getImageView().setY(250); break;
+			case 4: tree.getImageView().setX(600); tree.getImageView().setY(400); break;
+			case 5: tree.getImageView().setX(330); tree.getImageView().setY(350); break;
+			case 6: tree.getImageView().setX(40); tree.getImageView().setY(50); break;
+			case 7: tree.getImageView().setX(610); tree.getImageView().setY(80); break;
+			}
+			tree.setPos(tree.getImageView().getX(), tree.getImageView().getY());
+			Rectangle treeCollisionBox = new Rectangle(tree.getXPos() + tree.getCBoxOffsetX(),
+					tree.getYPos() + tree.getCBoxOffsetY(), tree.getCBoxWidth(), tree.getCBoxHeight());
+			sprites.add(tree);
+			obstacles.add(treeCollisionBox);
+		}
+
+		for (int i = 1; i <= 8; i++) {
+			Skeleton skeleton = new Skeleton();
+			switch (i)
+			{
+			case 1: skeleton.getImageView().setTranslateX(100); skeleton.getImageView().setTranslateY(150); break;
+			case 2: skeleton.getImageView().setTranslateX(300); skeleton.getImageView().setTranslateY(400); break;
+			case 3: skeleton.getImageView().setTranslateX(80); skeleton.getImageView().setTranslateY(180); break;
+			case 4: skeleton.getImageView().setTranslateX(600); skeleton.getImageView().setTranslateY(340); break;
+			case 5: skeleton.getImageView().setTranslateX(200); skeleton.getImageView().setTranslateY(40); break;
+			case 6: skeleton.getImageView().setTranslateX(520); skeleton.getImageView().setTranslateY(200); break;
+			case 7: skeleton.getImageView().setTranslateX(610); skeleton.getImageView().setTranslateY(0); break;
+			case 8: skeleton.getImageView().setTranslateX(400); skeleton.getImageView().setTranslateY(100); break;
+			}
+			skeleton.setPos(skeleton.getImageView().getTranslateX(), skeleton.getImageView().getTranslateY());
+			pane.getChildren().add(skeleton.getImageView());
+			sprites.add(skeleton);
+			monsters.add(skeleton);
+		}
 
 		introMusic.setVolume(0.6);
 		introMusic.setCycleCount(AudioClip.INDEFINITE);
 		introMusic.play();
 
 		animationTimer = new AnimationTimer() {
-			  @Override
-			  public void handle(long timestamp) {
+			@Override
+			public void handle(long timestamp) {
 				if (lastUpdateTime.get() > 0) {
 
-				  double elapsedSeconds = (timestamp - lastUpdateTime.get()) / 1_000_000_000.0 ;
-				  double deltaX = elapsedSeconds * player.getXvelocity();
-				  double deltaY = elapsedSeconds * player.getYvelocity();
-				  double oldX = player.getImageView().getTranslateX();
-				  double newX = Math.max(0, Math.min(pane.getWidth() - player.getWidth(), oldX + deltaX));
-				  double oldY = player.getImageView().getTranslateY();
-				  double newY = Math.max(0, Math.min(pane.getHeight() - player.getHeight(), oldY + deltaY));
-				  boolean collision = checkForCollision(player, newX, newY);
-				  if (!collision) {
-					  	player.getImageView().setTranslateX(newX);
-					  	player.getImageView().setTranslateY(newY);
-					  	player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
-					  	reorderNodes();
-				  }
+					// Animate the player movement based on velocity set by key presses
+					double elapsedSeconds = (timestamp - lastUpdateTime.get()) / 1_000_000_000.0 ;
+					double deltaX = elapsedSeconds * player.getXvelocity();
+					double deltaY = elapsedSeconds * player.getYvelocity();
+					double oldX = player.getImageView().getTranslateX();
+					double newX = Math.max(0, Math.min(pane.getWidth() - player.getWidth(), oldX + deltaX));
+					double oldY = player.getImageView().getTranslateY();
+					double newY = Math.max(0, Math.min(pane.getHeight() - player.getHeight(), oldY + deltaY));
+					boolean collision = checkForObstacleCollision(player, newX, newY);
+					if (!collision) {
+						player.getImageView().setTranslateX(newX);
+						player.getImageView().setTranslateY(newY);
+						player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
+						reorderNodes();
+					}
 
-				  double sDeltaX = elapsedSeconds * skeleton.getXvelocity();
-				  double sDeltaY = elapsedSeconds * skeleton.getYvelocity();
-				  double sOldX = skeleton.getImageView().getTranslateX();
-				  double sNewX = Math.max(0, Math.min(pane.getWidth() - skeleton.getWidth(), sOldX + sDeltaX));
-				  double sOldY = skeleton.getImageView().getTranslateY();
-				  double sNewY = Math.max(0, Math.min(pane.getHeight() - skeleton.getHeight(), sOldY + sDeltaY));
-				  boolean sCollision = checkForCollision(skeleton, sNewX,sNewY);
-				  if (!sCollision) {
-					  skeleton.getImageView().setTranslateX(sNewX);
-					  skeleton.getImageView().setTranslateY(sNewY);
-					  skeleton.setPos(skeleton.getImageView().getTranslateX(), skeleton.getImageView().getTranslateY());
-					  skeletonCBox.setX(skeleton.getXPos() + skeleton.getCBoxOffsetX());
-					  skeletonCBox.setY(skeleton.getYPos() + skeleton.getCBoxOffsetY());
-					  reorderNodes();
-				  }
+					// Animate the monsters randomly
+					for (AnimSprite monster : monsters) {
+						double sDeltaX = elapsedSeconds * monster.getXvelocity();
+						double sDeltaY = elapsedSeconds * monster.getYvelocity();
+						double sOldX = monster.getImageView().getTranslateX();
+						double sNewX = Math.max(0, Math.min(pane.getWidth() - monster.getWidth(), sOldX + sDeltaX));
+						double sOldY = monster.getImageView().getTranslateY();
+						double sNewY = Math.max(0, Math.min(pane.getHeight() - monster.getHeight(), sOldY + sDeltaY));
+						boolean sCollision = checkForObstacleCollision(monster, sNewX,sNewY);
+						if (!sCollision) {
+							monster.getImageView().setTranslateX(sNewX);
+							monster.getImageView().setTranslateY(sNewY);
+							monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
+							reorderNodes();
+						}
+						fixMonsterDirection(monster, sOldX + sDeltaX, sOldY + sDeltaY);
+					}
 
-				  if (checkForSkeletonCollision(skeletonCBox, newX, newY)) {
-					  skeleton.getAnimation().stop();
-					  VBox gameOverMessage = createGameOverPane();
-					  pane.getChildren().add(gameOverMessage);
-					  Timeline delayRestart = new Timeline(new KeyFrame(Duration.millis(3100), event -> {
-						  scene.setOnKeyPressed(e -> {
-							  if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.DIGIT2) {
-								  pane.getChildren().remove(gameOverMessage);
-								  skeleton.getImageView().setTranslateX(100);
-								  skeleton.getImageView().setTranslateY(150);
-								  skeleton.setPos(skeleton.getImageView().getTranslateX(), skeleton.getImageView().getTranslateY());
-								  restart();
-							  }
-						  });
-					  }));
-					  delayRestart.play();
-				  }
-
-				  if (skeleton.getImageView().getTranslateX() < sOldX + sDeltaX) {
-					  int randomDirection = RANDOM.nextInt(3);
-					  switch(randomDirection) {
-					  case 0:
-						  skeleton.walkDown();
-						  break;
-					  case 1:
-						  skeleton.walkUp();
-						  break;
-					  case 2:
-						  skeleton.walkLeft();
-					  }
-				  }
-				  else if (skeleton.getImageView().getTranslateX() > sOldX + sDeltaX) {
-					  int randomDirection = RANDOM.nextInt(3);
-					  switch(randomDirection) {
-					  case 0:
-						  skeleton.walkDown();
-						  break;
-					  case 1:
-						  skeleton.walkUp();
-						  break;
-					  case 2:
-						  skeleton.walkRight();
-						  break;
-					  }
-				  }
-				  else if (skeleton.getImageView().getTranslateY() < sOldY + sDeltaY) {
-					  int randomDirection = RANDOM.nextInt(3);
-					  switch(randomDirection) {
-					  case 0:
-						  skeleton.walkLeft();
-						  break;
-					  case 1:
-						  skeleton.walkUp();
-						  break;
-					  case 2:
-						  skeleton.walkRight();
-					  }
-				  }
-				  else if (skeleton.getImageView().getTranslateY() > sOldY + sDeltaY) {
-					  int randomDirection = RANDOM.nextInt(3);
-					  switch(randomDirection) {
-					  case 0:
-						  skeleton.walkDown();
-						  break;
-					  case 1:
-						  skeleton.walkLeft();
-						  break;
-					  case 2:
-						  skeleton.walkRight();
-					  }
-				  }
+					checkForMonsterCollision(newX, newY);
 
 				}
 				lastUpdateTime.set(timestamp);
-			  }
+			}
 		};
 		animationTimer.start();
 
 		timeline = new Timeline(
-		        new KeyFrame(
-		          Duration.ZERO, e -> {
-						  int randomDirection = RANDOM.nextInt(4);
-						  switch(randomDirection) {
-						  case 0:
-							  skeleton.walkDown();
-							  break;
-						  case 1:
-							  skeleton.walkUp();
-							  break;
-						  case 2:
-							  skeleton.walkRight();
-							  break;
-						  case 3:
-							  skeleton.walkLeft();
-						  }
-		            }
-		        ),
-		        new KeyFrame(Duration.seconds(2))
-		    );
+				new KeyFrame(
+						Duration.ZERO, e -> {
+							for (AnimSprite monster : monsters) {
+								int randomDirection = RANDOM.nextInt(4);
+								switch(randomDirection) {
+								case 0:
+									monster.walkDown();
+									break;
+								case 1:
+									monster.walkUp();
+									break;
+								case 2:
+									monster.walkRight();
+									break;
+								case 3:
+									monster.walkLeft();
+								}
+							}
+						}
+				),
+				new KeyFrame(Duration.seconds(2))
+		);
 		timeline.setCycleCount(Timeline.INDEFINITE);
 	    timeline.play();
 
@@ -293,7 +238,18 @@ public class LabEight {
 				left = true;
 			}
 
-			if (keysPressed.isEmpty()) {
+			if (keysPressed.size() == 1) {
+				if (keysPressed.contains(KeyCode.UP))
+					player.walkUp();
+				else if (keysPressed.contains(KeyCode.RIGHT))
+					player.walkRight();
+				else if (keysPressed.contains(KeyCode.DOWN))
+					player.walkDown();
+				else if (keysPressed.contains(KeyCode.LEFT))
+					player.walkLeft();
+			}
+
+			else if (keysPressed.isEmpty()) {
 				if (up) {
 					player.standBack();
 				}
@@ -310,36 +266,106 @@ public class LabEight {
 		});
 	}
 
-	private boolean checkForCollision(Sprite sprite, double newX, double newY) {
-		boolean collision = false;
+	private void fixMonsterDirection(AnimSprite monster, double desiredX, double desiredY) {
+		if (monster.getXPos() < desiredX) {
+			int randomDirection = RANDOM.nextInt(3);
+			switch(randomDirection) {
+			case 0:
+				monster.walkDown();
+				break;
+			case 1:
+				monster.walkUp();
+				break;
+			case 2:
+				monster.walkLeft();
+			}
+		}
+		else if (monster.getXPos() > desiredX) {
+			int randomDirection = RANDOM.nextInt(3);
+			switch(randomDirection) {
+			case 0:
+				monster.walkDown();
+				break;
+			case 1:
+				monster.walkUp();
+				break;
+			case 2:
+				monster.walkRight();
+				break;
+			}
+		}
+		else if (monster.getYPos() < desiredY) {
+			int randomDirection = RANDOM.nextInt(3);
+			switch(randomDirection) {
+			case 0:
+				monster.walkLeft();
+				break;
+			case 1:
+				monster.walkUp();
+				break;
+			case 2:
+				monster.walkRight();
+			}
+		}
+		else if (monster.getYPos() > desiredY) {
+			int randomDirection = RANDOM.nextInt(3);
+			switch(randomDirection) {
+			case 0:
+				monster.walkDown();
+				break;
+			case 1:
+				monster.walkLeft();
+				break;
+			case 2:
+				monster.walkRight();
+			}
+		}
+	}
+
+	private boolean checkForObstacleCollision(Sprite sprite, double newX, double newY) {
+		// If sprite is a monster check for collisions with other monsters
+		if (sprite != player) {
+			for (Sprite monster : monsters) {
+				if (monster != sprite) {
+					monsterCBox.setX(monster.getXPos() + monster.getCBoxOffsetX());
+					monsterCBox.setY(monster.getYPos() + monster.getCBoxOffsetY());
+					monsterCBox.setWidth(monster.getCBoxWidth());
+					monsterCBox.setHeight(monster.getCBoxHeight());
+					if (monsterCBox.getBoundsInLocal().intersects(
+							newX + sprite.getCBoxOffsetX(), newY + sprite.getCBoxOffsetY(),
+							sprite.getCBoxWidth(), sprite.getCBoxHeight())) {
+						if (sprite == player) {
+							gameOver();
+						}
+						return true;
+					}
+				}
+			}
+		}
+		// Check for collisions with obstacles
 		for (Rectangle obstacle : obstacles) {
 			if (obstacle.getBoundsInLocal().intersects(
 					newX + sprite.getCBoxOffsetX(), newY + sprite.getCBoxOffsetY(),
 					sprite.getCBoxWidth(), sprite.getCBoxHeight())) {
-				collision = true;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void checkForMonsterCollision(double newX, double newY) {
+		for (Sprite monster : monsters) {
+			monsterCBox.setX(monster.getXPos() + monster.getCBoxOffsetX());
+			monsterCBox.setY(monster.getYPos() + monster.getCBoxOffsetY());
+			monsterCBox.setWidth(monster.getCBoxWidth());
+			monsterCBox.setHeight(monster.getCBoxHeight());
+			if (monsterCBox.getBoundsInLocal().intersects(
+					newX + player.getCBoxOffsetX(), newY + player.getCBoxOffsetY(),
+					player.getCBoxWidth(), player.getCBoxHeight())) {
+				gameOver();
 				break;
 			}
 		}
-		return collision;
-	}
-
-	private boolean checkForSkeletonCollision(Rectangle skeletonCBox, double newX, double newY) {
-		boolean collision = false;
-		if (skeletonCBox.getBoundsInLocal().intersects(
-				newX + player.getCBoxOffsetX(), newY + player.getCBoxOffsetY(),
-				player.getCBoxWidth(), player.getCBoxHeight())) {
-			collision = true;
-			AudioClip soundEffect = new AudioClip(getClass().getResource("audio/gameover.wav").toString());
-			soundEffect.play();
-			animationTimer.stop();
-			timeline.stop();
-			introMusic.stop();
-			gameOverMusic.setVolume(0.5);
-			Timeline delayedMusic = new Timeline(new KeyFrame(Duration.seconds(3), e -> gameOverMusic.play()));
-			delayedMusic.play();
-			System.out.println("GAME OVER");
-		}
-		return collision;
 	}
 
 	private void reorderNodes() {
@@ -369,16 +395,58 @@ public class LabEight {
 		return vbox;
 	}
 
+	private void gameOver() {
+		AudioClip soundEffect = new AudioClip(getClass().getResource("audio/gameover.wav").toString());
+		soundEffect.play();
+		animationTimer.stop();
+		timeline.stop();
+		introMusic.stop();
+
+		gameOverMusic.setVolume(0.5);
+		Timeline delayedMusic = new Timeline(new KeyFrame(Duration.seconds(3), e -> gameOverMusic.play()));
+		delayedMusic.play();
+
+		System.out.println("GAME OVER");
+		VBox gameOverMessage = createGameOverPane();
+		pane.getChildren().add(gameOverMessage);
+
+		Timeline delayRestart = new Timeline(new KeyFrame(Duration.millis(3100), event -> {
+			scene.setOnKeyPressed(e -> {
+				if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.DIGIT2) {
+					pane.getChildren().remove(gameOverMessage);
+					restart();
+				}
+			});
+		}));
+		delayRestart.play();
+	}
+
 	private void restart() {
 		keysPressed.clear();
-		animationTimer.start();
 		introMusic.play();
-		timeline.play();
 		gameOverMusic.stop();
 		player.standFront();
 		player.getImageView().setTranslateX(pane.getMinWidth()/2 - player.getWidth()/2);
 		player.getImageView().setTranslateY(pane.getMinHeight()/2 - player.getHeight()/2);
 		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
+		int i = 1;
+		for (Sprite monster : monsters) {
+			switch (i)
+			{
+			case 1: monster.getImageView().setTranslateX(100); monster.getImageView().setTranslateY(150); break;
+			case 2: monster.getImageView().setTranslateX(300); monster.getImageView().setTranslateY(400); break;
+			case 3: monster.getImageView().setTranslateX(80); monster.getImageView().setTranslateY(180); break;
+			case 4: monster.getImageView().setTranslateX(600); monster.getImageView().setTranslateY(340); break;
+			case 5: monster.getImageView().setTranslateX(200); monster.getImageView().setTranslateY(40); break;
+			case 6: monster.getImageView().setTranslateX(520); monster.getImageView().setTranslateY(200); break;
+			case 7: monster.getImageView().setTranslateX(610); monster.getImageView().setTranslateY(0); break;
+			case 8: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(100); break;
+			}
+			monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
+			i++;
+		}
+		animationTimer.start();
+		timeline.play();
 		startKeyPressedEventHandler();
 	}
 
