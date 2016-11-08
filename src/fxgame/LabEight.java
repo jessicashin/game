@@ -57,17 +57,21 @@ public class LabEight {
 
 	private Set<KeyCode> keysPressed = new HashSet<KeyCode>();
 
+
 	public Scene createSpriteAnimationGame() {
 		pane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
 
 		pane.getChildren().add(player.getImageView());
 		pane.setMinSize(700, 500);
+
+		// Set player starting position to center of pane
 		player.getImageView().setTranslateX(pane.getMinWidth()/2 - player.getWidth()/2);
 		player.getImageView().setTranslateY(pane.getMinHeight()/2 - player.getHeight()/2);
 		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
 
 		sprites.add(player);
 
+		// Initialize trees
 		for (int i = 1; i <= 7; i++) {
 			Tree tree = new Tree();
 			pane.getChildren().add(tree.getImageView());
@@ -88,6 +92,7 @@ public class LabEight {
 			obstacles.add(treeCollisionBox);
 		}
 
+		// Initialize monsters
 		for (int i = 1; i <= 8; i++) {
 			Skeleton skeleton = new Skeleton();
 			switch (i)
@@ -191,6 +196,7 @@ public class LabEight {
 
 	}
 
+	// Event handler for player movement using arrow keys
 	private void startKeyPressedEventHandler() {
 		scene.setOnKeyPressed(e -> {
 			KeyCode key = e.getCode();
@@ -213,6 +219,7 @@ public class LabEight {
 		});
 	}
 
+	// Event handler for player movement using arrow keys
 	private void startKeyReleasedEventHandler() {
 		scene.setOnKeyReleased(e -> {
 			KeyCode key = e.getCode();
@@ -266,6 +273,7 @@ public class LabEight {
 		});
 	}
 
+	// Change direction if obstacle collision
 	private void fixMonsterDirection(AnimSprite monster, double desiredX, double desiredY) {
 		if (monster.getXPos() < desiredX) {
 			int randomDirection = RANDOM.nextInt(3);
@@ -353,6 +361,7 @@ public class LabEight {
 		return false;
 	}
 
+	// Check if player has collided with a monster and if so call game over
 	private void checkForMonsterCollision(double newX, double newY) {
 		for (Sprite monster : monsters) {
 			monsterCBox.setX(monster.getXPos() + monster.getCBoxOffsetX());
@@ -368,6 +377,7 @@ public class LabEight {
 		}
 	}
 
+	// Change the z-order of sprites on the pane based on xPos of collision box
 	private void reorderNodes() {
 		Collections.sort(sprites);
 		for (Sprite sprite : sprites) {
@@ -425,12 +435,17 @@ public class LabEight {
 		keysPressed.clear();
 		introMusic.play();
 		gameOverMusic.stop();
+
+		// Reset player position to center of pane
 		player.standFront();
 		player.getImageView().setTranslateX(pane.getMinWidth()/2 - player.getWidth()/2);
 		player.getImageView().setTranslateY(pane.getMinHeight()/2 - player.getHeight()/2);
 		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
+
+		// Reset monster positions
 		int i = 1;
-		for (Sprite monster : monsters) {
+		for (AnimSprite monster : monsters) {
+			monster.standFront();
 			switch (i)
 			{
 			case 1: monster.getImageView().setTranslateX(100); monster.getImageView().setTranslateY(150); break;
@@ -445,6 +460,8 @@ public class LabEight {
 			monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
 			i++;
 		}
+
+		// Restart animations
 		animationTimer.start();
 		timeline.play();
 		startKeyPressedEventHandler();
