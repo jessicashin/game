@@ -22,7 +22,7 @@ public class Skeleton extends AnimSprite {
 	Skeleton() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
 		this.setSpeed(90);
-		this.setCBox(7, 29, 34, 26);
+		this.setCBox(7, 27, 34, 28);
 	}
 
 
