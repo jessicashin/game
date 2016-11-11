@@ -1,5 +1,6 @@
 package fxgame;
 
+import javafx.geometry.Rectangle2D;
 import javafx.scene.image.ImageView;
 
 public abstract class Sprite implements Comparable<Sprite> {
@@ -156,6 +157,10 @@ public abstract class Sprite implements Comparable<Sprite> {
 		cBoxOffsetY = offsetY;
 		cBoxWidth = width;
 		cBoxHeight = height;
+	}
+
+	public Rectangle2D getCBox() {
+		return new Rectangle2D(xPos + cBoxOffsetX, yPos + cBoxOffsetY, cBoxWidth, cBoxHeight);
 	}
 
 	@Override

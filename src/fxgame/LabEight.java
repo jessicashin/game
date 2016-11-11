@@ -14,6 +14,7 @@ import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
@@ -25,7 +26,6 @@ import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -39,13 +39,12 @@ public class LabEight {
 
 	private final Brinn player = new Brinn();
 	private List<Sprite> sprites = new ArrayList<Sprite>();
-	private List<Rectangle> obstacles = new ArrayList<Rectangle>();
+	private List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
 	private List<AnimSprite> monsters = new ArrayList<AnimSprite>();
-	private Rectangle monsterCBox = new Rectangle();
 
 	private AnimationTimer animationTimer;
 	private final LongProperty lastUpdateTime = new SimpleLongProperty();
-	private Timeline timeline;
+	private Timeline monstersTimeline;
 
 	private final MediaPlayer introMusic = new MediaPlayer(
 		new Media(getClass().getResource("audio/intro.mp3").toString())
@@ -68,49 +67,13 @@ public class LabEight {
 		player.getImageView().setTranslateX(pane.getMinWidth()/2 - player.getWidth()/2);
 		player.getImageView().setTranslateY(pane.getMinHeight()/2 - player.getHeight()/2);
 		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
-
 		sprites.add(player);
 
 		// Initialize trees
-		for (int i = 1; i <= 7; i++) {
-			Tree tree = new Tree();
-			pane.getChildren().add(tree.getImageView());
-			switch (i)
-			{
-			case 1: tree.getImageView().setX(200); tree.getImageView().setY(150); break;
-			case 2: tree.getImageView().setX(400); tree.getImageView().setY(200); break;
-			case 3: tree.getImageView().setX(100); tree.getImageView().setY(250); break;
-			case 4: tree.getImageView().setX(600); tree.getImageView().setY(400); break;
-			case 5: tree.getImageView().setX(330); tree.getImageView().setY(350); break;
-			case 6: tree.getImageView().setX(40); tree.getImageView().setY(50); break;
-			case 7: tree.getImageView().setX(610); tree.getImageView().setY(80); break;
-			}
-			tree.setPos(tree.getImageView().getX(), tree.getImageView().getY());
-			Rectangle treeCollisionBox = new Rectangle(tree.getXPos() + tree.getCBoxOffsetX(),
-					tree.getYPos() + tree.getCBoxOffsetY(), tree.getCBoxWidth(), tree.getCBoxHeight());
-			sprites.add(tree);
-			obstacles.add(treeCollisionBox);
-		}
+		createTrees();
 
 		// Initialize monsters
-		for (int i = 1; i <= 8; i++) {
-			Skeleton skeleton = new Skeleton();
-			switch (i)
-			{
-			case 1: skeleton.getImageView().setTranslateX(100); skeleton.getImageView().setTranslateY(150); break;
-			case 2: skeleton.getImageView().setTranslateX(300); skeleton.getImageView().setTranslateY(400); break;
-			case 3: skeleton.getImageView().setTranslateX(80); skeleton.getImageView().setTranslateY(180); break;
-			case 4: skeleton.getImageView().setTranslateX(600); skeleton.getImageView().setTranslateY(340); break;
-			case 5: skeleton.getImageView().setTranslateX(200); skeleton.getImageView().setTranslateY(40); break;
-			case 6: skeleton.getImageView().setTranslateX(520); skeleton.getImageView().setTranslateY(200); break;
-			case 7: skeleton.getImageView().setTranslateX(610); skeleton.getImageView().setTranslateY(0); break;
-			case 8: skeleton.getImageView().setTranslateX(400); skeleton.getImageView().setTranslateY(100); break;
-			}
-			skeleton.setPos(skeleton.getImageView().getTranslateX(), skeleton.getImageView().getTranslateY());
-			pane.getChildren().add(skeleton.getImageView());
-			sprites.add(skeleton);
-			monsters.add(skeleton);
-		}
+		createMonsters();
 
 		introMusic.setVolume(0.6);
 		introMusic.setCycleCount(AudioClip.INDEFINITE);
@@ -155,7 +118,7 @@ public class LabEight {
 						fixMonsterDirection(monster, sOldX + sDeltaX, sOldY + sDeltaY);
 					}
 
-					checkForMonsterCollision(newX, newY);
+					checkForMonsterCollision();
 
 				}
 				lastUpdateTime.set(timestamp);
@@ -163,31 +126,8 @@ public class LabEight {
 		};
 		animationTimer.start();
 
-		timeline = new Timeline(
-				new KeyFrame(
-						Duration.ZERO, e -> {
-							for (AnimSprite monster : monsters) {
-								int randomDirection = RANDOM.nextInt(4);
-								switch(randomDirection) {
-								case 0:
-									monster.walkDown();
-									break;
-								case 1:
-									monster.walkUp();
-									break;
-								case 2:
-									monster.walkRight();
-									break;
-								case 3:
-									monster.walkLeft();
-								}
-							}
-						}
-				),
-				new KeyFrame(Duration.seconds(2))
-		);
-		timeline.setCycleCount(Timeline.INDEFINITE);
-	    timeline.play();
+		// Start loop that controls monster walking directions
+		animateMonsters();
 
 	    startKeyPressedEventHandler();
 		startKeyReleasedEventHandler();
@@ -196,26 +136,85 @@ public class LabEight {
 
 	}
 
+	// Initialize trees and set their positions on the pane
+	private void createTrees() {
+		for (int i = 1; i <= 7; i++) {
+			Tree tree = new Tree();
+			pane.getChildren().add(tree.getImageView());
+			switch (i)
+			{
+			case 1: tree.getImageView().setX(200); tree.getImageView().setY(150); break;
+			case 2: tree.getImageView().setX(400); tree.getImageView().setY(200); break;
+			case 3: tree.getImageView().setX(100); tree.getImageView().setY(250); break;
+			case 4: tree.getImageView().setX(600); tree.getImageView().setY(400); break;
+			case 5: tree.getImageView().setX(330); tree.getImageView().setY(350); break;
+			case 6: tree.getImageView().setX(40); tree.getImageView().setY(50); break;
+			case 7: tree.getImageView().setX(610); tree.getImageView().setY(80); break;
+			}
+			tree.setPos(tree.getImageView().getX(), tree.getImageView().getY());
+			sprites.add(tree);
+			obstacles.add(tree.getCBox());
+		}
+	}
+
+	// Initialize monsters and set their initial positions on the pane
+	private void createMonsters() {
+		for (int i = 1; i <= 8; i++) {
+			Skeleton skeleton = new Skeleton();
+			switch (i)
+			{
+			case 1: skeleton.getImageView().setTranslateX(100); skeleton.getImageView().setTranslateY(150); break;
+			case 2: skeleton.getImageView().setTranslateX(300); skeleton.getImageView().setTranslateY(400); break;
+			case 3: skeleton.getImageView().setTranslateX(80); skeleton.getImageView().setTranslateY(180); break;
+			case 4: skeleton.getImageView().setTranslateX(600); skeleton.getImageView().setTranslateY(340); break;
+			case 5: skeleton.getImageView().setTranslateX(200); skeleton.getImageView().setTranslateY(40); break;
+			case 6: skeleton.getImageView().setTranslateX(520); skeleton.getImageView().setTranslateY(200); break;
+			case 7: skeleton.getImageView().setTranslateX(610); skeleton.getImageView().setTranslateY(0); break;
+			case 8: skeleton.getImageView().setTranslateX(400); skeleton.getImageView().setTranslateY(100); break;
+			}
+			skeleton.setPos(skeleton.getImageView().getTranslateX(), skeleton.getImageView().getTranslateY());
+			pane.getChildren().add(skeleton.getImageView());
+			sprites.add(skeleton);
+			monsters.add(skeleton);
+		}
+	}
+
+	// Sends each monster in a random direction every 2 seconds
+	private void animateMonsters() {
+		monstersTimeline = new Timeline(
+				new KeyFrame(
+						Duration.ZERO, e -> {
+							for (AnimSprite monster : monsters) {
+								int randomDirection = RANDOM.nextInt(4);
+								switch(randomDirection) {
+									case 0: monster.walkDown(); break;
+									case 1: monster.walkUp(); break;
+									case 2: monster.walkRight(); break;
+									case 3: monster.walkLeft();
+								}
+							}
+						}
+				),
+				new KeyFrame(Duration.seconds(2))
+		);
+		monstersTimeline.setCycleCount(Timeline.INDEFINITE);
+		monstersTimeline.play();
+	}
+
 	// Event handler for player movement using arrow keys
 	private void startKeyPressedEventHandler() {
 		scene.setOnKeyPressed(e -> {
 			KeyCode key = e.getCode();
-			if (key == KeyCode.UP || key == KeyCode.KP_UP) {
-				player.walkUp();
-				keysPressed.add(KeyCode.UP);
+
+			switch(key) {
+				case UP:	player.walkUp(); break;
+				case RIGHT:	player.walkRight(); break;
+				case DOWN:	player.walkDown(); break;
+				case LEFT:	player.walkLeft(); break;
+				default: break;
 			}
-			else if (key == KeyCode.RIGHT || key == KeyCode.KP_RIGHT) {
-				player.walkRight();
-				keysPressed.add(KeyCode.RIGHT);
-			}
-			else if (key == KeyCode.DOWN || key == KeyCode.KP_DOWN) {
-				player.walkDown();
-				keysPressed.add(KeyCode.DOWN);
-			}
-			else if (key == KeyCode.LEFT || key == KeyCode.KP_LEFT) {
-				player.walkLeft();
-				keysPressed.add(KeyCode.LEFT);
-			}
+
+			keysPressed.add(key);
 		});
 	}
 
@@ -223,27 +222,7 @@ public class LabEight {
 	private void startKeyReleasedEventHandler() {
 		scene.setOnKeyReleased(e -> {
 			KeyCode key = e.getCode();
-			boolean up = false;
-			boolean down = false;
-			boolean left = false;
-			boolean right = false;
-
-			if (key == KeyCode.UP || key == KeyCode.KP_UP) {
-				keysPressed.remove(KeyCode.UP);
-				up = true;
-			}
-			else if (key == KeyCode.RIGHT || key == KeyCode.KP_RIGHT) {
-				keysPressed.remove(KeyCode.RIGHT);
-				right = true;
-			}
-			else if (key == KeyCode.DOWN || key == KeyCode.KP_DOWN) {
-				keysPressed.remove(KeyCode.DOWN);
-				down = true;
-			}
-			else if (key == KeyCode.LEFT || key == KeyCode.KP_LEFT) {
-				keysPressed.remove(KeyCode.LEFT);
-				left = true;
-			}
+			keysPressed.remove(key);
 
 			if (keysPressed.size() == 1) {
 				if (keysPressed.contains(KeyCode.UP))
@@ -257,17 +236,12 @@ public class LabEight {
 			}
 
 			else if (keysPressed.isEmpty()) {
-				if (up) {
-					player.standBack();
-				}
-				else if (right) {
-					player.standRight();
-				}
-				else if (down) {
-					player.standFront();
-				}
-				else if (left) {
-					player.standLeft();
+				switch(key) {
+					case UP:	player.standBack(); break;
+					case RIGHT:	player.standRight(); break;
+					case DOWN:	player.standFront(); break;
+					case LEFT:	player.standLeft(); break;
+					default: break;
 				}
 			}
 		});
@@ -278,54 +252,33 @@ public class LabEight {
 		if (monster.getXPos() < desiredX) {
 			int randomDirection = RANDOM.nextInt(3);
 			switch(randomDirection) {
-			case 0:
-				monster.walkDown();
-				break;
-			case 1:
-				monster.walkUp();
-				break;
-			case 2:
-				monster.walkLeft();
+				case 0: monster.walkDown(); break;
+				case 1: monster.walkUp(); break;
+				case 2: monster.walkLeft();
 			}
 		}
 		else if (monster.getXPos() > desiredX) {
 			int randomDirection = RANDOM.nextInt(3);
 			switch(randomDirection) {
-			case 0:
-				monster.walkDown();
-				break;
-			case 1:
-				monster.walkUp();
-				break;
-			case 2:
-				monster.walkRight();
-				break;
+				case 0: monster.walkDown(); break;
+				case 1: monster.walkUp(); break;
+				case 2: monster.walkRight();
 			}
 		}
 		else if (monster.getYPos() < desiredY) {
 			int randomDirection = RANDOM.nextInt(3);
 			switch(randomDirection) {
-			case 0:
-				monster.walkLeft();
-				break;
-			case 1:
-				monster.walkUp();
-				break;
-			case 2:
-				monster.walkRight();
+				case 0: monster.walkLeft(); break;
+				case 1: monster.walkUp(); break;
+				case 2: monster.walkRight();
 			}
 		}
 		else if (monster.getYPos() > desiredY) {
 			int randomDirection = RANDOM.nextInt(3);
 			switch(randomDirection) {
-			case 0:
-				monster.walkDown();
-				break;
-			case 1:
-				monster.walkLeft();
-				break;
-			case 2:
-				monster.walkRight();
+				case 0: monster.walkDown(); break;
+				case 1: monster.walkLeft(); break;
+				case 2: monster.walkRight();
 			}
 		}
 	}
@@ -335,11 +288,7 @@ public class LabEight {
 		if (sprite != player) {
 			for (Sprite monster : monsters) {
 				if (monster != sprite) {
-					monsterCBox.setX(monster.getXPos() + monster.getCBoxOffsetX());
-					monsterCBox.setY(monster.getYPos() + monster.getCBoxOffsetY());
-					monsterCBox.setWidth(monster.getCBoxWidth());
-					monsterCBox.setHeight(monster.getCBoxHeight());
-					if (monsterCBox.getBoundsInLocal().intersects(
+					if (monster.getCBox().intersects(
 							newX + sprite.getCBoxOffsetX(), newY + sprite.getCBoxOffsetY(),
 							sprite.getCBoxWidth(), sprite.getCBoxHeight())) {
 						if (sprite == player) {
@@ -351,9 +300,8 @@ public class LabEight {
 			}
 		}
 		// Check for collisions with obstacles
-		for (Rectangle obstacle : obstacles) {
-			if (obstacle.getBoundsInLocal().intersects(
-					newX + sprite.getCBoxOffsetX(), newY + sprite.getCBoxOffsetY(),
+		for (Rectangle2D obstacle : obstacles) {
+			if (obstacle.intersects(newX + sprite.getCBoxOffsetX(), newY + sprite.getCBoxOffsetY(),
 					sprite.getCBoxWidth(), sprite.getCBoxHeight())) {
 				return true;
 			}
@@ -362,15 +310,9 @@ public class LabEight {
 	}
 
 	// Check if player has collided with a monster and if so call game over
-	private void checkForMonsterCollision(double newX, double newY) {
+	private void checkForMonsterCollision() {
 		for (Sprite monster : monsters) {
-			monsterCBox.setX(monster.getXPos() + monster.getCBoxOffsetX());
-			monsterCBox.setY(monster.getYPos() + monster.getCBoxOffsetY());
-			monsterCBox.setWidth(monster.getCBoxWidth());
-			monsterCBox.setHeight(monster.getCBoxHeight());
-			if (monsterCBox.getBoundsInLocal().intersects(
-					newX + player.getCBoxOffsetX(), newY + player.getCBoxOffsetY(),
-					player.getCBoxWidth(), player.getCBoxHeight())) {
+			if (monster.getCBox().intersects(player.getCBox())) {
 				gameOver();
 				break;
 			}
@@ -409,7 +351,7 @@ public class LabEight {
 		AudioClip soundEffect = new AudioClip(getClass().getResource("audio/gameover.wav").toString());
 		soundEffect.play();
 		animationTimer.stop();
-		timeline.stop();
+		monstersTimeline.stop();
 		introMusic.stop();
 
 		gameOverMusic.setVolume(0.5);
@@ -465,7 +407,7 @@ public class LabEight {
 
 		// Restart animations
 		animationTimer.start();
-		timeline.play();
+		monstersTimeline.play();
 		startKeyPressedEventHandler();
 	}
 
