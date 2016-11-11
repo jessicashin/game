@@ -10,7 +10,7 @@ public class Fish extends Sprite {
 	Fish() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT);
 		this.setSpeed(200);
-		this.setXvelocity(-this.getSpeed()); // Fish swim from right to left
+		this.setVelocity(-this.getSpeed(), 0); // Fish swim from right to left
 	}
 
 }

@@ -23,8 +23,8 @@ public abstract class AnimSprite extends Sprite {
 	}
 
 	public void stopMoving() {
-		setXvelocity(0);
-		setYvelocity(0);
+		setXVelocity(0);
+		setYVelocity(0);
 		animation.stop();
 	}
 	public abstract void standFront();
@@ -33,23 +33,23 @@ public abstract class AnimSprite extends Sprite {
 	public abstract void standRight();
 
 	public void walkDown() {
-		setXvelocity(0);
-		setYvelocity(getSpeed());
+		setXVelocity(0);
+		setYVelocity(getSpeed());
 		animation.play();
 	}
 	public void walkLeft() {
-		setXvelocity(-getSpeed());
-		setYvelocity(0);
+		setXVelocity(-getSpeed());
+		setYVelocity(0);
 		animation.play();
 	}
 	public void walkUp() {
-		setXvelocity(0);
-		setYvelocity(-getSpeed());
+		setXVelocity(0);
+		setYVelocity(-getSpeed());
 		animation.play();
 	}
 	public void walkRight() {
-		setXvelocity(getSpeed());
-		setYvelocity(0);
+		setXVelocity(getSpeed());
+		setYVelocity(0);
 		animation.play();
 	}
 	public SpriteAnimation getAnimation() {

@@ -99,25 +99,25 @@ public abstract class Sprite implements Comparable<Sprite> {
 		this.speed = speed;
 	}
 
-	public int getXvelocity() {
+	public int getXVelocity() {
 		return xVelocity;
 	}
 
-	public void setXvelocity(int velocity) {
+	public void setXVelocity(int velocity) {
 		this.xVelocity = velocity;
 	}
 
-	public int getYvelocity() {
+	public int getYVelocity() {
 		return yVelocity;
 	}
 
-	public void setYvelocity(int velocity) {
+	public void setYVelocity(int velocity) {
 		this.yVelocity = velocity;
 	}
 
 	public void setVelocity(int x, int y) {
-		setXvelocity(x);
-		setYvelocity(y);
+		setXVelocity(x);
+		setYVelocity(y);
 	}
 
 	public int getCBoxOffsetX() {

@@ -86,8 +86,8 @@ public class LabEight {
 
 					// Animate the player movement based on velocity set by key presses
 					double elapsedSeconds = (timestamp - lastUpdateTime.get()) / 1_000_000_000.0 ;
-					double deltaX = elapsedSeconds * player.getXvelocity();
-					double deltaY = elapsedSeconds * player.getYvelocity();
+					double deltaX = elapsedSeconds * player.getXVelocity();
+					double deltaY = elapsedSeconds * player.getYVelocity();
 					double oldX = player.getImageView().getTranslateX();
 					double newX = Math.max(0, Math.min(pane.getWidth() - player.getWidth(), oldX + deltaX));
 					double oldY = player.getImageView().getTranslateY();
@@ -102,8 +102,8 @@ public class LabEight {
 
 					// Animate the monsters randomly
 					for (AnimSprite monster : monsters) {
-						double sDeltaX = elapsedSeconds * monster.getXvelocity();
-						double sDeltaY = elapsedSeconds * monster.getYvelocity();
+						double sDeltaX = elapsedSeconds * monster.getXVelocity();
+						double sDeltaY = elapsedSeconds * monster.getYVelocity();
 						double sOldX = monster.getImageView().getTranslateX();
 						double sNewX = Math.max(0, Math.min(pane.getWidth() - monster.getWidth(), sOldX + sDeltaX));
 						double sOldY = monster.getImageView().getTranslateY();

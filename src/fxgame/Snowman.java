@@ -26,8 +26,7 @@ public class Snowman extends AnimSprite {
 
 
 	private void stand() {
-		setXvelocity(0);
-		setYvelocity(0);
+		setVelocity(0, 0);
 	}
 
 	public void standFront() {
@@ -52,29 +51,29 @@ public class Snowman extends AnimSprite {
 
 	@Override
 	public void walkDown() {
-		setXvelocity(0);
-		setYvelocity(getSpeed());
+		setXVelocity(0);
+		setYVelocity(getSpeed());
 		getImageView().setViewport(faceFront);
 	}
 
 	@Override
 	public void walkLeft() {
-		setXvelocity(-getSpeed());
-		setYvelocity(0);
+		setXVelocity(-getSpeed());
+		setYVelocity(0);
 		getImageView().setViewport(faceLeft);
 	}
 
 	@Override
 	public void walkUp() {
-		setXvelocity(0);
-		setYvelocity(-getSpeed());
+		setXVelocity(0);
+		setYVelocity(-getSpeed());
 		getImageView().setViewport(faceBack);
 	}
 
 	@Override
 	public void walkRight() {
-		setXvelocity(getSpeed());
-		setYvelocity(0);
+		setXVelocity(getSpeed());
+		setYVelocity(0);
 		getImageView().setViewport(faceRight);
 	}
 
