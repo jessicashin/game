@@ -12,14 +12,12 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.AudioClip;
@@ -63,10 +61,10 @@ public class LabEight {
 	private static final Set<KeyCode> keysPressed = new HashSet<KeyCode>();
 
 	static {
-		pane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
+		pane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, null, null)));
 
 		pane.getChildren().add(player.getImageView());
-		pane.setMinSize(700, 500);
+		pane.setMinSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 
 		// Set player starting position to center of pane
 		player.getImageView().setTranslateX(pane.getMinWidth()/2 - player.getWidth()/2);
@@ -365,7 +363,7 @@ public class LabEight {
 		gameOverPane.getChildren().addAll(gameOverText, restartText);
 		gameOverPane.setSpacing(50);
 		gameOverPane.setAlignment(Pos.CENTER);
-		gameOverPane.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+		gameOverPane.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
 		gameOverPane.prefWidthProperty().bind(pane.widthProperty());
 		gameOverPane.prefHeightProperty().bind(pane.heightProperty());
 	}

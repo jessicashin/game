@@ -16,7 +16,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -81,7 +80,7 @@ public class PartOne {
 
 		startClickEventHandler();
 
-		vbox.setMinSize(700, 500);
+		vbox.setMinSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 		VBox.setVgrow(drawingPane, Priority.ALWAYS);
 	}
 
@@ -156,12 +155,12 @@ public class PartOne {
 		form.setSpacing(30);
 		form.setPadding(new Insets(20, 20, 15, 20));
 		form.setAlignment(Pos.CENTER);
-		form.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+		form.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
 	}
 
 	// Create the pane where the user clicks to draw sprites
 	private static void initDrawingPane() {
-		drawingPane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
+		drawingPane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, null, null)));
 		Rectangle clipOverflow = new Rectangle();
 		clipOverflow.widthProperty().bind(drawingPane.widthProperty());
 		clipOverflow.heightProperty().bind(drawingPane.heightProperty());
@@ -186,8 +185,8 @@ public class PartOne {
 			if (!scale.matches("^[1-9]\\d*(\\.\\d+)?$")) {
 				errorMessage += "\nYou must enter a valid number for scale.";
 			}
-			else if (Double.parseDouble(scale) < 20 || Double.parseDouble(scale) > 500) {
-				errorMessage += "\nPlease keep scale between 20% and 500%";
+			else if (Double.parseDouble(scale) < 20 || Double.parseDouble(scale) > 1000) {
+				errorMessage += "\nPlease keep scale between 20% and 1000%";
 			}
 		}
 		return errorMessage;
@@ -264,32 +263,55 @@ public class PartOne {
 	// Create ImageView from entity name
 	private static void drawImage(String name, double scale, double mouseX, double mouseY) {
 		Sprite sprite = entityHash.get(name);
-		Image image = new Image(sprite.getImagePath(), sprite.getWidth()*scale, sprite.getHeight()*scale, true, false);
-		ImageView imageView = new ImageView(image);
-		imageView.setX(mouseX - imageView.getBoundsInParent().getWidth()/2);
-		imageView.setY(mouseY - imageView.getBoundsInParent().getHeight()/2);
+		ImageView imageView;
+		if (scale >=1) {
+			Image image = new Image(sprite.getImagePath(), sprite.getWidth()*scale, sprite.getHeight()*scale, true, false);
+			imageView = new ImageView(image);
+		}
+		else {
+			imageView = new ImageView(sprite.getImagePath());
+			imageView.setScaleX(scale);
+			imageView.setScaleY(scale);
+		}
+		imageView.setX(mouseX - imageView.getBoundsInLocal().getWidth()/2);
+		imageView.setY(mouseY - imageView.getBoundsInLocal().getHeight()/2);
 		drawingPane.getChildren().add(imageView);
 	}
 
 	// Create animated ImageView from entity name
 	private static void drawAnimation(String name, double scale, double mouseX, double mouseY) {
 		Sprite sprite = entityHash.get(name);
-		Image image = new Image (
-				sprite.getImagePath(), sprite.getWidth()*animationHash.get(name).get("columns")*scale,
-				sprite.getHeight()*(animationHash.get(name).get("count")/animationHash.get(name).get("columns"))*scale,
-				true, false
-		);
-		ImageView imageView = new ImageView(image);
-        imageView.setViewport(new Rectangle2D(0, 0, sprite.getWidth()*scale, sprite.getHeight()*scale));
-        Animation animation = new SpriteAnimation(
-                imageView, Duration.millis(animationHash.get(name).get("duration")),
-                animationHash.get(name).get("count"), animationHash.get(name).get("columns"),
-                0, 0, sprite.getWidth()*scale, sprite.getHeight()*scale
-        );
+		ImageView imageView;
+		Animation animation;
+		if (scale >= 1) {
+			Image image = new Image (
+					sprite.getImagePath(), sprite.getWidth()*animationHash.get(name).get("columns")*scale,
+					sprite.getHeight()*(animationHash.get(name).get("count")/animationHash.get(name).get("columns"))*scale,
+					true, false
+			);
+			imageView = new ImageView(image);
+	        imageView.setViewport(new Rectangle2D(0, 0, sprite.getWidth()*scale, sprite.getHeight()*scale));
+	        animation = new SpriteAnimation (
+	                imageView, Duration.millis(animationHash.get(name).get("duration")),
+	                animationHash.get(name).get("count"), animationHash.get(name).get("columns"),
+	                0, 0, sprite.getWidth()*scale, sprite.getHeight()*scale
+	        );
+		}
+		else {
+			imageView = new ImageView(sprite.getImagePath());
+			imageView.setViewport(new Rectangle2D(0, 0, sprite.getWidth(), sprite.getHeight()));
+			imageView.setScaleX(scale);
+			imageView.setScaleY(scale);
+			animation = new SpriteAnimation (
+					imageView, Duration.millis(animationHash.get(name).get("duration")),
+	                animationHash.get(name).get("count"), animationHash.get(name).get("columns"),
+	                0, 0, sprite.getWidth(), sprite.getHeight()
+			);
+		}
         animation.setCycleCount(Animation.INDEFINITE);
         animation.play();
-        imageView.setX(mouseX - imageView.getBoundsInParent().getWidth()/2);
-        imageView.setY(mouseY - imageView.getBoundsInParent().getHeight()/2);
+        imageView.setX(mouseX - imageView.getBoundsInLocal().getWidth()/2);
+        imageView.setY(mouseY - imageView.getBoundsInLocal().getHeight()/2);
         drawingPane.getChildren().add(imageView);
 	}
 

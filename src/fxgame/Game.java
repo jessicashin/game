@@ -23,7 +23,7 @@ public class Game extends Application {
 			if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.DIGIT2) {
 				TitleScreen.stopMusic();
 
-				// stage.setScene(PartOne.getScene());
+				//stage.setScene(PartOne.getScene());
 				stage.setScene(LabEight.getScene());
 
 			}
