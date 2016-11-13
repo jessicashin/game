@@ -90,4 +90,8 @@ public class Luffy extends AnimSprite {
 		animation.setOffsetY(WALK_RIGHT_OFFSET_Y);
 	}
 
+	public void eatItem(Sprite item) {
+		// TODO: add consequence for eating
+	}
+
 }

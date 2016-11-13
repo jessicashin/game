@@ -9,17 +9,13 @@ import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -38,17 +34,63 @@ import javafx.util.Duration;
 
 public class PartOne {
 
-	private final MediaPlayer introMusic = new MediaPlayer(
-		new Media(getClass().getResource("audio/intro.mp3").toString())
+	private static final VBox vbox = new VBox();
+	private static final Scene scene = new Scene(vbox);
+
+	private static final MediaPlayer introMusic = new MediaPlayer(
+		new Media(PartOne.class.getResource("audio/intro.mp3").toString())
 	);
 
+	// Form at top of scene with sprite selection and scale input
+	private static final HBox form = new HBox();
+	// ComboBox populated with all entities
+	private static final ComboBox<String> spriteSelect = new ComboBox<String>();
+	// Text input field for scale percentage
+	private static final TextField scaleInput = new TextField();
+
+	// Pane to draw sprites on click
+	private static final Pane drawingPane = new Pane();
+	private static final Rectangle drawingPaneBorder = new Rectangle();
+
 	// Map of entity name (String) to entity Image for entity selection
-	static final Map<String, Sprite> entityHash = new LinkedHashMap<String, Sprite>();
+	private static final Map<String, Sprite> entityHash = new LinkedHashMap<String, Sprite>();
 
 	// Map of entity name (String) to its values needed for animation
-	static final Map<String, Map<String, Integer>> animationHash = new HashMap<String, Map<String, Integer>>();
+	private static final Map<String, Map<String, Integer>> animationHash = new HashMap<String, Map<String, Integer>>();
 
-	PartOne() {
+	private static final AudioClip dropSoundEffect = new AudioClip(
+		PartOne.class.getResource("audio/bop.wav").toString()
+	);
+	private static final AudioClip errorSoundEffect = new AudioClip(
+		PartOne.class.getResource("audio/error.wav").toString()
+	);
+
+	static {
+		initEntityHash();
+		initAnimationHash();
+
+		scene.getStylesheets().add("fxgame/fxgame.css");
+
+		initForm();
+		initDrawingPane();
+
+		vbox.getChildren().addAll(form, drawingPane);
+
+		introMusic.setVolume(0.6);
+		introMusic.setCycleCount(AudioClip.INDEFINITE);
+
+		startClickEventHandler();
+
+		vbox.setMinSize(700, 500);
+		VBox.setVgrow(drawingPane, Priority.ALWAYS);
+	}
+
+	public static Scene getScene() {
+		introMusic.play();
+		return scene;
+	}
+
+	private static void initEntityHash() {
 		entityHash.put("Brinn", new Brinn());
 		entityHash.put("Luffy", new Luffy());
 		entityHash.put("heart", new Heart());
@@ -59,7 +101,9 @@ public class PartOne {
 		entityHash.put("tree", new Tree());
 		entityHash.put("winterfruit", new Winterfruit());
 		entityHash.put("icemelon", new Icemelon());
+	}
 
+	private static void initAnimationHash() {
 		// Create maps of animation values for each entity image
 		final Map<String, Integer> girlAnimVals = new HashMap<String, Integer>();
 		girlAnimVals.put("count", 32);
@@ -84,11 +128,8 @@ public class PartOne {
 		animationHash.put("snowman", snowmanAnimVals);
 	}
 
-	public VBox createPartOne() {
-		VBox vbox = new VBox();
-
-		// ComboBox populated with all entities to select the sprite to display on click
-		ComboBox<String> spriteSelect = new ComboBox<String>();
+	// Create the form for sprite selection and scale input
+	private static void initForm() {
 		spriteSelect.setPromptText("Select sprite");
 		for (Map.Entry<String, Sprite> sprite : entityHash.entrySet()) {
 			spriteSelect.getItems().add(sprite.getKey());
@@ -99,62 +140,66 @@ public class PartOne {
 		HBox scalePercentage = new HBox();
 		scalePercentage.setAlignment(Pos.CENTER_LEFT);
 		scalePercentage.setSpacing(5);
-		TextField scaleInput = new TextField();
 		scaleInput.setPromptText("Enter scale");
 		scaleInput.setStyle("-fx-font-family: 'Determination Sans';");
 		scaleInput.setPrefWidth(100);
 		Text percentSign = new Text("%");
-		percentSign.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 16));
+		percentSign.setFont(Font.loadFont(PartOne.class.getResourceAsStream("fonts/DTM-Mono.otf"), 16));
 		percentSign.setFill(Color.WHITE);
 		scalePercentage.getChildren().addAll(scaleInput, percentSign);
 
 		Text instructions = new Text("Click anywhere below to draw the sprite!");
-		instructions.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Sans.otf"), 16));
+		instructions.setFont(Font.loadFont(PartOne.class.getResourceAsStream("fonts/DTM-Sans.otf"), 16));
 		instructions.setFill(Color.WHITE);
 
-		HBox form = new HBox();
 		form.getChildren().addAll(spriteSelect, scalePercentage, instructions);
 		form.setSpacing(30);
 		form.setPadding(new Insets(20, 20, 15, 20));
 		form.setAlignment(Pos.CENTER);
 		form.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+	}
 
-		// Pane to draw sprites on click
-		Pane pane = new Pane();
-		pane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(10))));
-		pane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
+	// Create the pane where the user clicks to draw sprites
+	private static void initDrawingPane() {
+		drawingPane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
+		Rectangle clipOverflow = new Rectangle();
+		clipOverflow.widthProperty().bind(drawingPane.widthProperty());
+		clipOverflow.heightProperty().bind(drawingPane.heightProperty());
+		drawingPane.setClip(clipOverflow);
 
-		introMusic.setVolume(0.6);
-		introMusic.setCycleCount(AudioClip.INDEFINITE);
-		introMusic.play();
-		AudioClip dropSoundEffect = new AudioClip(getClass().getResource("audio/bop.wav").toString());
-		AudioClip errorSoundEffect = new AudioClip(getClass().getResource("audio/error.wav").toString());
+		drawingPaneBorder.widthProperty().bind(drawingPane.widthProperty());
+		drawingPaneBorder.heightProperty().bind(drawingPane.heightProperty());
+		drawingPaneBorder.setY(form.getHeight());
+		drawingPaneBorder.setStroke(Color.BLACK);
+		drawingPaneBorder.setStrokeWidth(20);
+		drawingPaneBorder.setFill(Color.TRANSPARENT);
+		drawingPane.getChildren().add(drawingPaneBorder);
+	}
 
-		pane.setOnMouseClicked(event -> {
+	// Validate sprite selection and scale input
+	private static String validateForm(String sprite, String scale) {
+		String errorMessage = "";
+		if (sprite == null) {
+			errorMessage = "\nYou must select a sprite to draw.";
+		}
+		if (!scale.isEmpty()) {
+			if (!scale.matches("^[1-9]\\d*(\\.\\d+)?$")) {
+				errorMessage += "\nYou must enter a valid number for scale.";
+			}
+			else if (Double.parseDouble(scale) < 20 || Double.parseDouble(scale) > 500) {
+				errorMessage += "\nPlease keep scale between 20% and 500%";
+			}
+		}
+		return errorMessage;
+	}
+
+	private static void startClickEventHandler() {
+		drawingPane.setOnMouseClicked(event -> {
 			String sprite = spriteSelect.getValue();
-			String error = validateForm(spriteSelect.getValue(), scaleInput.getText());
+			String errorMessage = validateForm(spriteSelect.getValue(), scaleInput.getText());
 			// If validation fails, flash an error message
-			if (!error.isEmpty()) {
-				StackPane errorMessage = new StackPane();
-				Rectangle errorBg = new Rectangle(500, 200);
-				errorBg.setFill(Color.BLACK);
-				errorBg.setStroke(Color.WHITE);
-				errorBg.setStrokeWidth(5);
-				Text errorText = new Text(error);
-				errorText.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 17));
-				errorText.setTextAlignment(TextAlignment.CENTER);
-				errorText.setFill(Color.WHITE);
-				errorMessage.getChildren().addAll(errorBg, errorText);
-				errorMessage.setPrefSize(pane.getWidth(), pane.getHeight());
-				errorMessage.setAlignment(Pos.CENTER);
-				pane.getChildren().add(errorMessage);
-				errorSoundEffect.play();
-				FadeTransition fade = new FadeTransition(Duration.millis(500), errorMessage);
-		        fade.setFromValue(1);
-		        fade.setToValue(0);
-		        fade.setDelay(Duration.seconds(3));
-		        fade.play();
-		        fade.setOnFinished(e -> pane.getChildren().remove(errorMessage));
+			if (!errorMessage.isEmpty()) {
+				drawErrorPane(errorMessage);
 			}
 			else {
 				// If no input for scale, default to 100%
@@ -163,74 +208,71 @@ public class PartOne {
 				if (!scaleInput.getText().isEmpty()) {
 					scale = Double.parseDouble(scaleInput.getText())/100;
 				}
+
 				// For animated sprites, draw animation
 				if (animationHash.containsKey(sprite)) {
-					ImageView spriteView = drawAnimation(sprite, scale);
-					spriteView.setX(event.getX() - spriteView.getBoundsInParent().getWidth()/2);
-					spriteView.setY(event.getY() - spriteView.getBoundsInParent().getHeight()/2);
-					pane.getChildren().add(spriteView);
-				}
-				// Draw entity with JavaFX shapes
-				else if (sprite.equals("icemelon")) {
-					Group spriteView = createShapeSprite(scale);
-					spriteView.relocate(event.getX(), event.getY());
-					pane.getChildren().add(spriteView);
-					spriteView.setTranslateX(-spriteView.getBoundsInParent().getWidth()/2);
-					spriteView.setTranslateY(-spriteView.getBoundsInParent().getHeight()/2);
-				}
-				// Draw the rest as plain images
-				else {
-					ImageView spriteView = drawImage(sprite, scale);
-					spriteView.setX(event.getX() - spriteView.getBoundsInParent().getWidth()/2);
-					spriteView.setY(event.getY() - spriteView.getBoundsInParent().getHeight()/2);
-					pane.getChildren().add(spriteView);
+					drawAnimation(sprite, scale, event.getX(), event.getY());
 				}
 
-				// Play sound effect on click
+				// Draw entity with JavaFX shapes
+				else if (sprite.equals("icemelon")) {
+					drawShapeSprite(scale, event.getX(), event.getY());
+				}
+
+				// Draw the rest as plain images
+				else {
+					drawImage(sprite, scale, event.getX(), event.getY());
+				}
+
+				drawingPaneBorder.toFront();
 				dropSoundEffect.play();
 			}
 		});
-
-		vbox.getChildren().addAll(form, pane);
-		vbox.setMinSize(700, 500);
-		VBox.setVgrow(pane, Priority.ALWAYS);
-
-		return vbox;
 	}
 
-	// Validate sprite selection and scale input
-	private String validateForm(String sprite, String scale) {
-		String errorMessage = "";
-		if (sprite == null) {
-			errorMessage = "ERROR:\nYou must select a sprite to draw.";
-		}
-		if (!scale.isEmpty()) {
-			if (!scale.matches("^[1-9]\\d*(\\.\\d+)?$")) {
-				if (errorMessage.isEmpty()) {
-					errorMessage += "ERROR:";
-				}
-				errorMessage += "\nYou must enter a valid number for scale.";
-			}
-			else if (Double.parseDouble(scale) < 20 || Double.parseDouble(scale) > 1000) {
-				if (errorMessage.isEmpty()) {
-					errorMessage += "ERROR:";
-				}
-				errorMessage += "\nPlease keep scale between 20% and 1000%";
-			}
-		}
-		return errorMessage;
+	private static void drawErrorPane(String message) {
+		StackPane errorPane = new StackPane();
+		Rectangle errorBg = new Rectangle(500, 200);
+		errorBg.setFill(Color.BLACK);
+		errorBg.setStroke(Color.WHITE);
+		errorBg.setStrokeWidth(5);
+		VBox error = new VBox();
+		error.setAlignment(Pos.CENTER);
+		Text errorText = new Text("ERROR:");
+		errorText.setFont(Font.loadFont(PartOne.class.getResourceAsStream("fonts/DTM-Mono.otf"), 24));
+		errorText.setFill(Color.WHITE);
+		Text errorMsgText = new Text(message);
+		errorMsgText.setFont(Font.loadFont(PartOne.class.getResourceAsStream("fonts/DTM-Mono.otf"), 17));
+		errorMsgText.setTextAlignment(TextAlignment.CENTER);
+		errorMsgText.setFill(Color.WHITE);
+		error.getChildren().addAll(errorText, errorMsgText);
+		errorPane.getChildren().addAll(errorBg, error);
+		errorPane.setPrefSize(drawingPane.getWidth(), drawingPane.getHeight());
+		errorPane.setAlignment(Pos.CENTER);
+
+		errorSoundEffect.play();
+		drawingPane.getChildren().add(errorPane);
+
+		FadeTransition fade = new FadeTransition(Duration.millis(500), errorPane);
+        fade.setFromValue(1);
+        fade.setToValue(0);
+        fade.setDelay(Duration.seconds(3));
+        fade.play();
+        fade.setOnFinished(e -> drawingPane.getChildren().remove(errorPane));
 	}
 
 	// Create ImageView from entity name
-	private ImageView drawImage(String name, double scale) {
+	private static void drawImage(String name, double scale, double mouseX, double mouseY) {
 		Sprite sprite = entityHash.get(name);
 		Image image = new Image(sprite.getImagePath(), sprite.getWidth()*scale, sprite.getHeight()*scale, true, false);
 		ImageView imageView = new ImageView(image);
-		return imageView;
+		imageView.setX(mouseX - imageView.getBoundsInParent().getWidth()/2);
+		imageView.setY(mouseY - imageView.getBoundsInParent().getHeight()/2);
+		drawingPane.getChildren().add(imageView);
 	}
 
 	// Create animated ImageView from entity name
-	private ImageView drawAnimation(String name, double scale) {
+	private static void drawAnimation(String name, double scale, double mouseX, double mouseY) {
 		Sprite sprite = entityHash.get(name);
 		Image image = new Image (
 				sprite.getImagePath(), sprite.getWidth()*animationHash.get(name).get("columns")*scale,
@@ -246,12 +288,17 @@ public class PartOne {
         );
         animation.setCycleCount(Animation.INDEFINITE);
         animation.play();
-        return imageView;
+        imageView.setX(mouseX - imageView.getBoundsInParent().getWidth()/2);
+        imageView.setY(mouseY - imageView.getBoundsInParent().getHeight()/2);
+        drawingPane.getChildren().add(imageView);
 	}
 
 	// Create entity from JavaFX shapes (icemelon)
-	private Group createShapeSprite(double scale) {
+	private static void drawShapeSprite(double scale, double mouseX, double mouseY) {
 		Icemelon icemelon = new Icemelon(scale);
-		return icemelon.getSprite();
+		icemelon.getSprite().relocate(mouseX, mouseY);
+		drawingPane.getChildren().add(icemelon.getSprite());
+		icemelon.getSprite().setTranslateX(-icemelon.getSprite().getBoundsInParent().getWidth()/2);
+		icemelon.getSprite().setTranslateY(-icemelon.getSprite().getBoundsInParent().getHeight()/2);
 	}
 }

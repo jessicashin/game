@@ -77,4 +77,8 @@ public class Snowman extends AnimSprite {
 		getImageView().setViewport(faceRight);
 	}
 
+	public void throwSnowball() {
+		// TODO
+	}
+
 }

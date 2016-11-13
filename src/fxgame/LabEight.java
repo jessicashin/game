@@ -34,30 +34,35 @@ public class LabEight {
 
 	private static final Random RANDOM = new Random();
 
-	private final Pane pane = new Pane();
-	private final Scene scene = new Scene(pane);
+	private static final Pane pane = new Pane();
+	private static final Scene scene = new Scene(pane);
 
-	private final Brinn player = new Brinn();
-	private List<Sprite> sprites = new ArrayList<Sprite>();
-	private List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
-	private List<AnimSprite> monsters = new ArrayList<AnimSprite>();
+	private static final VBox gameOverPane = new VBox();
+	private static final Text restartText = new Text("[Press 2 or ENTER to restart]");
 
-	private AnimationTimer animationTimer;
-	private final LongProperty lastUpdateTime = new SimpleLongProperty();
-	private Timeline monstersTimeline;
+	private static final Brinn player = new Brinn();
+	private static final List<Sprite> sprites = new ArrayList<Sprite>();
+	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
+	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
 
-	private final MediaPlayer introMusic = new MediaPlayer(
-		new Media(getClass().getResource("audio/intro.mp3").toString())
+	private static AnimationTimer animationTimer;
+	private static final LongProperty lastUpdateTime = new SimpleLongProperty();
+	private static Timeline monstersTimeline;
+
+	private static final MediaPlayer music = new MediaPlayer(
+		new Media(LabEight.class.getResource("audio/intro.mp3").toString())
 	);
 
-	private final MediaPlayer gameOverMusic = new MediaPlayer(
-		new Media(getClass().getResource("audio/gameover.mp3").toString())
+	private static final AudioClip gameOverSoundEffect = new AudioClip(
+		LabEight.class.getResource("audio/gameover.wav").toString()
+	);
+	private static final MediaPlayer gameOverMusic = new MediaPlayer(
+		new Media(LabEight.class.getResource("audio/gameover.mp3").toString())
 	);
 
-	private Set<KeyCode> keysPressed = new HashSet<KeyCode>();
+	private static final Set<KeyCode> keysPressed = new HashSet<KeyCode>();
 
-
-	public Scene createSpriteAnimationGame() {
+	static {
 		pane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
 
 		pane.getChildren().add(player.getImageView());
@@ -75,51 +80,23 @@ public class LabEight {
 		// Initialize monsters
 		createMonsters();
 
-		introMusic.setVolume(0.6);
-		introMusic.setCycleCount(AudioClip.INDEFINITE);
-		introMusic.play();
+		music.setVolume(0.6);
+		music.setCycleCount(AudioClip.INDEFINITE);
+
+		gameOverMusic.setVolume(0.5);
+		createGameOverPane();
 
 		animationTimer = new AnimationTimer() {
 			@Override
 			public void handle(long timestamp) {
 				if (lastUpdateTime.get() > 0) {
-
-					// Animate the player movement based on velocity set by key presses
 					double elapsedSeconds = (timestamp - lastUpdateTime.get()) / 1_000_000_000.0 ;
-					double deltaX = elapsedSeconds * player.getXVelocity();
-					double deltaY = elapsedSeconds * player.getYVelocity();
-					double oldX = player.getImageView().getTranslateX();
-					double newX = Math.max(0, Math.min(pane.getWidth() - player.getWidth(), oldX + deltaX));
-					double oldY = player.getImageView().getTranslateY();
-					double newY = Math.max(0, Math.min(pane.getHeight() - player.getHeight(), oldY + deltaY));
-					boolean collision = checkForObstacleCollision(player, newX, newY);
-					if (!collision) {
-						player.getImageView().setTranslateX(newX);
-						player.getImageView().setTranslateY(newY);
-						player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
-						reorderNodes();
-					}
 
-					// Animate the monsters randomly
-					for (AnimSprite monster : monsters) {
-						double sDeltaX = elapsedSeconds * monster.getXVelocity();
-						double sDeltaY = elapsedSeconds * monster.getYVelocity();
-						double sOldX = monster.getImageView().getTranslateX();
-						double sNewX = Math.max(0, Math.min(pane.getWidth() - monster.getWidth(), sOldX + sDeltaX));
-						double sOldY = monster.getImageView().getTranslateY();
-						double sNewY = Math.max(0, Math.min(pane.getHeight() - monster.getHeight(), sOldY + sDeltaY));
-						boolean sCollision = checkForObstacleCollision(monster, sNewX,sNewY);
-						if (!sCollision) {
-							monster.getImageView().setTranslateX(sNewX);
-							monster.getImageView().setTranslateY(sNewY);
-							monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
-							reorderNodes();
-						}
-						fixMonsterDirection(monster, sOldX + sDeltaX, sOldY + sDeltaY);
-					}
+					animatePlayer(elapsedSeconds);
+					animateMonsters(elapsedSeconds);
 
+					// Check if the player has collided with a monster
 					checkForMonsterCollision();
-
 				}
 				lastUpdateTime.set(timestamp);
 			}
@@ -127,17 +104,21 @@ public class LabEight {
 		animationTimer.start();
 
 		// Start loop that controls monster walking directions
-		animateMonsters();
+		setMonsterDirections();
 
+		// Start key event handlers for player movement
 	    startKeyPressedEventHandler();
 		startKeyReleasedEventHandler();
+	}
 
+
+	public static Scene getScene() {
+		music.play();
 		return scene;
-
 	}
 
 	// Initialize trees and set their positions on the pane
-	private void createTrees() {
+	private static void createTrees() {
 		for (int i = 1; i <= 7; i++) {
 			Tree tree = new Tree();
 			pane.getChildren().add(tree.getImageView());
@@ -158,29 +139,77 @@ public class LabEight {
 	}
 
 	// Initialize monsters and set their initial positions on the pane
-	private void createMonsters() {
+	private static void createMonsters() {
 		for (int i = 1; i <= 8; i++) {
 			Skeleton skeleton = new Skeleton();
-			switch (i)
-			{
-			case 1: skeleton.getImageView().setTranslateX(100); skeleton.getImageView().setTranslateY(150); break;
-			case 2: skeleton.getImageView().setTranslateX(300); skeleton.getImageView().setTranslateY(400); break;
-			case 3: skeleton.getImageView().setTranslateX(80); skeleton.getImageView().setTranslateY(180); break;
-			case 4: skeleton.getImageView().setTranslateX(600); skeleton.getImageView().setTranslateY(340); break;
-			case 5: skeleton.getImageView().setTranslateX(200); skeleton.getImageView().setTranslateY(40); break;
-			case 6: skeleton.getImageView().setTranslateX(520); skeleton.getImageView().setTranslateY(200); break;
-			case 7: skeleton.getImageView().setTranslateX(610); skeleton.getImageView().setTranslateY(0); break;
-			case 8: skeleton.getImageView().setTranslateX(400); skeleton.getImageView().setTranslateY(100); break;
-			}
-			skeleton.setPos(skeleton.getImageView().getTranslateX(), skeleton.getImageView().getTranslateY());
 			pane.getChildren().add(skeleton.getImageView());
 			sprites.add(skeleton);
 			monsters.add(skeleton);
 		}
+		initMonsterPos();
+	}
+
+	// Set initial positions on the pane for each monster
+	private static void initMonsterPos() {
+		int i = 1;
+		for (AnimSprite monster : monsters) {
+			monster.standFront();
+			switch (i)
+			{
+			case 1: monster.getImageView().setTranslateX(100); monster.getImageView().setTranslateY(150); break;
+			case 2: monster.getImageView().setTranslateX(300); monster.getImageView().setTranslateY(400); break;
+			case 3: monster.getImageView().setTranslateX(80); monster.getImageView().setTranslateY(180); break;
+			case 4: monster.getImageView().setTranslateX(600); monster.getImageView().setTranslateY(340); break;
+			case 5: monster.getImageView().setTranslateX(200); monster.getImageView().setTranslateY(40); break;
+			case 6: monster.getImageView().setTranslateX(520); monster.getImageView().setTranslateY(200); break;
+			case 7: monster.getImageView().setTranslateX(610); monster.getImageView().setTranslateY(0); break;
+			case 8: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(100); break;
+			default: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(100);
+			}
+			monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
+			i++;
+		}
+	}
+
+	// Animate the player movement based on velocity set by key presses
+	private static void animatePlayer(double elapsedSeconds) {
+		double deltaX = elapsedSeconds * player.getXVelocity();
+		double deltaY = elapsedSeconds * player.getYVelocity();
+		double oldX = player.getImageView().getTranslateX();
+		double newX = Math.max(0, Math.min(pane.getWidth() - player.getWidth(), oldX + deltaX));
+		double oldY = player.getImageView().getTranslateY();
+		double newY = Math.max(0, Math.min(pane.getHeight() - player.getHeight(), oldY + deltaY));
+		boolean collision = checkForObstacleCollision(player, newX, newY);
+		if (!collision) {
+			player.getImageView().setTranslateX(newX);
+			player.getImageView().setTranslateY(newY);
+			player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
+			reorderNodes();
+		}
+	}
+
+	// Animate the monsters movement based on their randomly set velocities
+	private static void animateMonsters(double elapsedSeconds) {
+		for (AnimSprite monster : monsters) {
+			double sDeltaX = elapsedSeconds * monster.getXVelocity();
+			double sDeltaY = elapsedSeconds * monster.getYVelocity();
+			double sOldX = monster.getImageView().getTranslateX();
+			double sNewX = Math.max(0, Math.min(pane.getWidth() - monster.getWidth(), sOldX + sDeltaX));
+			double sOldY = monster.getImageView().getTranslateY();
+			double sNewY = Math.max(0, Math.min(pane.getHeight() - monster.getHeight(), sOldY + sDeltaY));
+			boolean sCollision = checkForObstacleCollision(monster, sNewX,sNewY);
+			if (!sCollision) {
+				monster.getImageView().setTranslateX(sNewX);
+				monster.getImageView().setTranslateY(sNewY);
+				monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
+				reorderNodes();
+			}
+			fixMonsterDirection(monster, sOldX + sDeltaX, sOldY + sDeltaY);
+		}
 	}
 
 	// Sends each monster in a random direction every 2 seconds
-	private void animateMonsters() {
+	private static void setMonsterDirections() {
 		monstersTimeline = new Timeline(
 				new KeyFrame(
 						Duration.ZERO, e -> {
@@ -202,7 +231,7 @@ public class LabEight {
 	}
 
 	// Event handler for player movement using arrow keys
-	private void startKeyPressedEventHandler() {
+	private static void startKeyPressedEventHandler() {
 		scene.setOnKeyPressed(e -> {
 			KeyCode key = e.getCode();
 
@@ -219,7 +248,7 @@ public class LabEight {
 	}
 
 	// Event handler for player movement using arrow keys
-	private void startKeyReleasedEventHandler() {
+	private static void startKeyReleasedEventHandler() {
 		scene.setOnKeyReleased(e -> {
 			KeyCode key = e.getCode();
 			keysPressed.remove(key);
@@ -248,9 +277,9 @@ public class LabEight {
 	}
 
 	// Change direction if obstacle collision
-	private void fixMonsterDirection(AnimSprite monster, double desiredX, double desiredY) {
+	private static void fixMonsterDirection(AnimSprite monster, double desiredX, double desiredY) {
+		int randomDirection = RANDOM.nextInt(3);
 		if (monster.getXPos() < desiredX) {
-			int randomDirection = RANDOM.nextInt(3);
 			switch(randomDirection) {
 				case 0: monster.walkDown(); break;
 				case 1: monster.walkUp(); break;
@@ -258,7 +287,6 @@ public class LabEight {
 			}
 		}
 		else if (monster.getXPos() > desiredX) {
-			int randomDirection = RANDOM.nextInt(3);
 			switch(randomDirection) {
 				case 0: monster.walkDown(); break;
 				case 1: monster.walkUp(); break;
@@ -266,7 +294,6 @@ public class LabEight {
 			}
 		}
 		else if (monster.getYPos() < desiredY) {
-			int randomDirection = RANDOM.nextInt(3);
 			switch(randomDirection) {
 				case 0: monster.walkLeft(); break;
 				case 1: monster.walkUp(); break;
@@ -274,7 +301,6 @@ public class LabEight {
 			}
 		}
 		else if (monster.getYPos() > desiredY) {
-			int randomDirection = RANDOM.nextInt(3);
 			switch(randomDirection) {
 				case 0: monster.walkDown(); break;
 				case 1: monster.walkLeft(); break;
@@ -283,7 +309,7 @@ public class LabEight {
 		}
 	}
 
-	private boolean checkForObstacleCollision(Sprite sprite, double newX, double newY) {
+	private static boolean checkForObstacleCollision(Sprite sprite, double newX, double newY) {
 		// If sprite is a monster check for collisions with other monsters
 		if (sprite != player) {
 			for (Sprite monster : monsters) {
@@ -310,7 +336,7 @@ public class LabEight {
 	}
 
 	// Check if player has collided with a monster and if so call game over
-	private void checkForMonsterCollision() {
+	private static void checkForMonsterCollision() {
 		for (Sprite monster : monsters) {
 			if (monster.getCBox().intersects(player.getCBox())) {
 				gameOver();
@@ -320,64 +346,65 @@ public class LabEight {
 	}
 
 	// Change the z-order of sprites on the pane based on xPos of collision box
-	private void reorderNodes() {
+	private static void reorderNodes() {
 		Collections.sort(sprites);
 		for (Sprite sprite : sprites) {
 			sprite.getImageView().toFront();
 		}
 	}
 
-	private VBox createGameOverPane() {
-		VBox vbox = new VBox();
+	private static void createGameOverPane() {
 		Text gameOverText = new Text("game over");
 		gameOverText.setFill(Color.WHITE);
-		gameOverText.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/MonsterFriendFore.otf"), 50));
-		Text restartText = new Text("[Press 2 or ENTER to restart]");
+		gameOverText.setFont(Font.loadFont(LabEight.class.getResourceAsStream("fonts/MonsterFriendFore.otf"), 50));
+
+		// Instructions for restarting the game (starts out hidden)
 		restartText.setFill(Color.BLACK);
-		Timeline restartTextDelay = new Timeline(
-				new KeyFrame(Duration.seconds(3), e -> restartText.setFill(Color.LIGHTGRAY))
-		);
-		restartTextDelay.play();
-		restartText.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 20));
-		vbox.getChildren().addAll(gameOverText, restartText);
-		vbox.setSpacing(50);
-		vbox.setAlignment(Pos.CENTER);
-		vbox.setPrefSize(pane.getBoundsInParent().getWidth(), pane.getBoundsInParent().getHeight());
-		vbox.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
-		return vbox;
+		restartText.setFont(Font.loadFont(LabEight.class.getResourceAsStream("fonts/DTM-Mono.otf"), 20));
+
+		gameOverPane.getChildren().addAll(gameOverText, restartText);
+		gameOverPane.setSpacing(50);
+		gameOverPane.setAlignment(Pos.CENTER);
+		gameOverPane.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+		gameOverPane.prefWidthProperty().bind(pane.widthProperty());
+		gameOverPane.prefHeightProperty().bind(pane.heightProperty());
 	}
 
-	private void gameOver() {
-		AudioClip soundEffect = new AudioClip(getClass().getResource("audio/gameover.wav").toString());
-		soundEffect.play();
+	private static void gameOver() {
+		music.stop();
 		animationTimer.stop();
 		monstersTimeline.stop();
-		introMusic.stop();
 
-		gameOverMusic.setVolume(0.5);
-		Timeline delayedMusic = new Timeline(new KeyFrame(Duration.seconds(3), e -> gameOverMusic.play()));
-		delayedMusic.play();
+		gameOverSoundEffect.play();
 
-		System.out.println("GAME OVER");
-		VBox gameOverMessage = createGameOverPane();
-		pane.getChildren().add(gameOverMessage);
-		gameOverMessage.prefWidthProperty().bind(pane.widthProperty());
-		gameOverMessage.prefHeightProperty().bind(pane.heightProperty());
+		// Play music after 3 seconds, once the game over sound effect finishes
+		Timeline delayMusic = new Timeline(new KeyFrame(Duration.seconds(3), e -> gameOverMusic.play()));
 
-		Timeline delayRestart = new Timeline(new KeyFrame(Duration.millis(3100), event -> {
+		// Add game over pane, display the instructions for restarting after 3 seconds
+		restartText.setFill(Color.BLACK);
+		pane.getChildren().add(gameOverPane);
+		Timeline delayRestartText = new Timeline(
+				new KeyFrame(Duration.seconds(3), e -> restartText.setFill(Color.LIGHTGRAY))
+		);
+
+		// Let key press restart game after 3 seconds on the game over pane
+		Timeline delayRestart = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
 			scene.setOnKeyPressed(e -> {
 				if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.DIGIT2) {
-					pane.getChildren().remove(gameOverMessage);
+					pane.getChildren().remove(gameOverPane);
 					restart();
 				}
 			});
 		}));
+
+		delayMusic.play();
+		delayRestartText.play();
 		delayRestart.play();
 	}
 
-	private void restart() {
+	private static void restart() {
 		keysPressed.clear();
-		introMusic.play();
+		music.play();
 		gameOverMusic.stop();
 
 		// Reset player position to center of pane
@@ -387,23 +414,7 @@ public class LabEight {
 		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
 
 		// Reset monster positions
-		int i = 1;
-		for (AnimSprite monster : monsters) {
-			monster.standFront();
-			switch (i)
-			{
-			case 1: monster.getImageView().setTranslateX(100); monster.getImageView().setTranslateY(150); break;
-			case 2: monster.getImageView().setTranslateX(300); monster.getImageView().setTranslateY(400); break;
-			case 3: monster.getImageView().setTranslateX(80); monster.getImageView().setTranslateY(180); break;
-			case 4: monster.getImageView().setTranslateX(600); monster.getImageView().setTranslateY(340); break;
-			case 5: monster.getImageView().setTranslateX(200); monster.getImageView().setTranslateY(40); break;
-			case 6: monster.getImageView().setTranslateX(520); monster.getImageView().setTranslateY(200); break;
-			case 7: monster.getImageView().setTranslateX(610); monster.getImageView().setTranslateY(0); break;
-			case 8: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(100); break;
-			}
-			monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
-			i++;
-		}
+		initMonsterPos();
 
 		// Restart animations
 		animationTimer.start();

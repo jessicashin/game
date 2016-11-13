@@ -45,6 +45,7 @@ of her dog Luffy.
 --------------------------------------------------------------------------
 
 DESIGN OF 10 ENTITIES
+(see corresponding classes for variables and methods)
 
 Brinn (player)
 Brinn is controlled by the player. She can move left, right, up, and down.
