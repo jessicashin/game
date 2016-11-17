@@ -100,8 +100,9 @@ public class RoomPane {
 	}
 
 	public static Pane getPane() {
-		if (player.getXPos() != Game.WINDOW_WIDTH/2 - player.getWidth()/2
-				&& player.getYPos() != Game.WINDOW_HEIGHT/2 - player.getHeight()/2) {
+		// Position player at room entrance unless start of game
+		// At start of game player is positioned at the center (from static initializer)
+		if (player.getYPos() > Game.WINDOW_HEIGHT/2 - player.getHeight()/2) {
 			player.setPos(302, 430);
 			player.getImageView().setTranslateX(player.getXPos());
 			player.getImageView().setTranslateY(player.getYPos());

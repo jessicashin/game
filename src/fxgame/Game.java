@@ -14,7 +14,7 @@ public class Game extends Application {
 
 	public static enum GameState {
 		TITLE, PART_ONE, LAB_EIGHT,
-		ROOM, HOME
+		ROOM, HOME, EXIT_HOME, EXIT_HOME2
 	}
 
 	private static GameState currentState;
@@ -72,14 +72,15 @@ public class Game extends Application {
 	public static void setPane(GameState state) {
 		switch (currentState) {
 			case ROOM: RoomPane.stopMusic(); break;
-			case HOME: HomePane.stopMusic(); break;
 			default: break;
 		}
 
 		currentState = state;
 		switch (state) {
-			case ROOM: scene.setRoot(RoomPane.getPane()); break;
+			case ROOM: scene.setRoot(RoomPane.getPane()); HomePane.stopMusic(); break;
 			case HOME: scene.setRoot(HomePane.getPane()); break;
+			case EXIT_HOME: scene.setRoot(ExitHomePane.getPane()); break;
+			case EXIT_HOME2: scene.setRoot(ExitHome2Pane.getPane()); break;
 			default: break;
 		}
 	}

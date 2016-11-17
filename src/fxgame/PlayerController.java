@@ -54,7 +54,6 @@ public class PlayerController {
 		PlayerController.sprites = sprites;
 		PlayerController.obstacles = obstacles;
 		PlayerController.exits = exits;
-		animationTimer.start();
 	}
 
 	private static final Set<KeyCode> keysPressed = new HashSet<KeyCode>();
@@ -131,35 +130,24 @@ public class PlayerController {
 		// Check if player is exiting scene
 		private static GameState checkIfExit(double x, double y) {
 			if (keysPressed.contains(KeyCode.UP) && exits.containsKey(KeyCode.UP)
-					&& y == 0 - OFFSCREEN_Y) {
-				player.standBack();
-				animationTimer.stop();
+					&& y == 0 - OFFSCREEN_Y)
 				return exits.get(KeyCode.UP);
-			}
 
 			else if (keysPressed.contains(KeyCode.RIGHT) && exits.containsKey(KeyCode.RIGHT)
-					&& x == scene.getWidth() - OFFSCREEN_X) {
-				player.standRight();
-				animationTimer.stop();
+					&& x == scene.getWidth() - OFFSCREEN_X)
 				return exits.get(KeyCode.RIGHT);
-			}
 
 			else if (keysPressed.contains(KeyCode.DOWN) && exits.containsKey(KeyCode.DOWN)
-					&& y == scene.getHeight() - OFFSCREEN_Y) {
-				player.standFront();
-				animationTimer.stop();
+					&& y == scene.getHeight() - OFFSCREEN_Y)
 				return exits.get(KeyCode.DOWN);
-			}
 
 			else if (keysPressed.contains(KeyCode.LEFT) && exits.containsKey(KeyCode.LEFT)
-					&& x == 0 - OFFSCREEN_X) {
-				player.standLeft();
-				animationTimer.stop();
+					&& x == 0 - OFFSCREEN_X)
 				return exits.get(KeyCode.LEFT);
-			}
 
+			// If igloo door, change to room scene
 			else if (Game.getCurrentState() == GameState.HOME && keysPressed.contains(KeyCode.UP)
-					&& x > 262 && x < 281 && y < 340)
+					&& x > 260 && x < 282 && y < 340)
 				return GameState.ROOM;
 
 			return null;

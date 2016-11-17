@@ -61,7 +61,7 @@ public class LabEight {
 	private static final Set<KeyCode> keysPressed = new HashSet<KeyCode>();
 
 	static {
-		pane.setBackground(new Background(new BackgroundFill(Color.web("rgb(130,160,218)"), null, null)));
+		pane.setBackground(new Background(new BackgroundFill(Color.web("rgb(114,125,179)"), null, null)));
 
 		pane.getChildren().add(player.getImageView());
 		pane.setMinSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
