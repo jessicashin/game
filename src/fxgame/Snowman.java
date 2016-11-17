@@ -21,7 +21,7 @@ public class Snowman extends AnimSprite {
 
 	Snowman() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT);
-		this.setSpeed(110);
+		this.setSpeed(120);
 	}
 
 

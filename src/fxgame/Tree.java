@@ -4,18 +4,17 @@ public class Tree extends Sprite {
 
 	private static final String IMAGE_PATH = "fxgame/images/tree.png";
 
-	private static final int SPRITE_WIDTH = 38;
-	private static final int SPRITE_HEIGHT = 56;
+	private static final int SPRITE_WIDTH = 108;
+	private static final int SPRITE_HEIGHT = 120;
 
-	private int age = 0;
 	private boolean hasFruit = false;
 
 	Tree() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT);
-		this.setCBoxOffsetX(0);
-		this.setCBoxOffsetY(33);
-		this.setCBoxWidth(SPRITE_WIDTH);
-		this.setCBoxHeight(SPRITE_HEIGHT - this.getCBoxOffsetY());
+		this.setCBoxOffsetX(10);
+		this.setCBoxOffsetY(52);
+		this.setCBoxWidth(88);
+		this.setCBoxHeight(68);
 	}
 
 	public boolean hasFruit() {
@@ -28,14 +27,6 @@ public class Tree extends Sprite {
 
 	public void pickFruit() {
 		hasFruit = false;
-	}
-
-	public int getAge() {
-		return age;
-	}
-
-	public void setAge(int age) {
-		this.age = age;
 	}
 
 }

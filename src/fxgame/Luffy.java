@@ -33,6 +33,7 @@ public class Luffy extends AnimSprite {
 	Luffy() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
 		this.setSpeed(100);
+		this.setCBox(12, 9, 28, 22);
 	}
 
 

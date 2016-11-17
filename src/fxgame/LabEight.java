@@ -33,7 +33,7 @@ public class LabEight {
 	private static final Random RANDOM = new Random();
 
 	private static final Pane pane = new Pane();
-	private static final Scene scene = new Scene(pane);
+	private static final Scene scene = new Scene(pane, Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 
 	private static final VBox gameOverPane = new VBox();
 	private static final Text restartText = new Text("[Press 2 or ENTER to restart]");
@@ -61,10 +61,12 @@ public class LabEight {
 	private static final Set<KeyCode> keysPressed = new HashSet<KeyCode>();
 
 	static {
-		pane.setBackground(new Background(new BackgroundFill(Color.SLATEGRAY, null, null)));
+		pane.setBackground(new Background(new BackgroundFill(Color.web("rgb(130,160,218)"), null, null)));
 
 		pane.getChildren().add(player.getImageView());
 		pane.setMinSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
+		pane.setMaxSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
+		pane.setPrefSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 
 		// Set player starting position to center of pane
 		player.getImageView().setTranslateX(pane.getMinWidth()/2 - player.getWidth()/2);
@@ -115,20 +117,22 @@ public class LabEight {
 		return scene;
 	}
 
+	public static void stopMusic() {
+		music.stop();
+	}
+
 	// Initialize trees and set their positions on the pane
 	private static void createTrees() {
-		for (int i = 1; i <= 7; i++) {
+		for (int i = 1; i <= 5; i++) {
 			Tree tree = new Tree();
 			pane.getChildren().add(tree.getImageView());
 			switch (i)
 			{
-			case 1: tree.getImageView().setX(200); tree.getImageView().setY(150); break;
-			case 2: tree.getImageView().setX(400); tree.getImageView().setY(200); break;
+			case 1: tree.getImageView().setX(180); tree.getImageView().setY(150); break;
+			case 2: tree.getImageView().setX(400); tree.getImageView().setY(100); break;
 			case 3: tree.getImageView().setX(100); tree.getImageView().setY(250); break;
-			case 4: tree.getImageView().setX(600); tree.getImageView().setY(400); break;
-			case 5: tree.getImageView().setX(330); tree.getImageView().setY(350); break;
-			case 6: tree.getImageView().setX(40); tree.getImageView().setY(50); break;
-			case 7: tree.getImageView().setX(610); tree.getImageView().setY(80); break;
+			case 4: tree.getImageView().setX(480); tree.getImageView().setY(300); break;
+			case 5: tree.getImageView().setX(40); tree.getImageView().setY(50); break;
 			}
 			tree.setPos(tree.getImageView().getX(), tree.getImageView().getY());
 			sprites.add(tree);
@@ -161,8 +165,8 @@ public class LabEight {
 			case 5: monster.getImageView().setTranslateX(200); monster.getImageView().setTranslateY(40); break;
 			case 6: monster.getImageView().setTranslateX(520); monster.getImageView().setTranslateY(200); break;
 			case 7: monster.getImageView().setTranslateX(610); monster.getImageView().setTranslateY(0); break;
-			case 8: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(100); break;
-			default: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(100);
+			case 8: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(510); break;
+			default: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(510);
 			}
 			monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
 			i++;

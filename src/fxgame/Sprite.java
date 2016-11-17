@@ -3,7 +3,7 @@ package fxgame;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.ImageView;
 
-public abstract class Sprite implements Comparable<Sprite> {
+public class Sprite implements Comparable<Sprite> {
 
 	private String imagePath;
 	private ImageView sprite;

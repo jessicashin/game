@@ -36,7 +36,7 @@ public class PartOne {
 	private static final VBox vbox = new VBox();
 	private static final Scene scene = new Scene(vbox);
 
-	private static final MediaPlayer introMusic = new MediaPlayer(
+	private static final MediaPlayer music = new MediaPlayer(
 		new Media(PartOne.class.getResource("audio/intro.mp3").toString())
 	);
 
@@ -75,8 +75,8 @@ public class PartOne {
 
 		vbox.getChildren().addAll(form, drawingPane);
 
-		introMusic.setVolume(0.6);
-		introMusic.setCycleCount(AudioClip.INDEFINITE);
+		music.setVolume(0.6);
+		music.setCycleCount(AudioClip.INDEFINITE);
 
 		startClickEventHandler();
 
@@ -85,8 +85,12 @@ public class PartOne {
 	}
 
 	public static Scene getScene() {
-		introMusic.play();
+		music.play();
 		return scene;
+	}
+
+	public static void stopMusic() {
+		music.stop();
 	}
 
 	private static void initEntityHash() {
@@ -152,7 +156,7 @@ public class PartOne {
 		instructions.setFill(Color.WHITE);
 
 		form.getChildren().addAll(spriteSelect, scalePercentage, instructions);
-		form.setSpacing(30);
+		form.setSpacing(20);
 		form.setPadding(new Insets(20, 20, 15, 20));
 		form.setAlignment(Pos.CENTER);
 		form.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
