@@ -15,7 +15,7 @@ public class Brinn extends AnimSprite {
 	private static final int SPRITE_COUNT = 4;
 	private static final int SPRITE_COLUMNS = 4;
 
-	private static final int ANIM_DURATION = 500;
+	private static final int ANIM_DURATION = 480;
 
 	private static final int FRONT_OFFSET_Y = 0;
 	private static final int LEFT_OFFSET_Y = SPRITE_HEIGHT;
@@ -31,7 +31,7 @@ public class Brinn extends AnimSprite {
 
 	Brinn() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
-		this.setSpeed(140);
+		this.setSpeed(150);
 		this.setCBox(3, 34, 31, 23);
 	}
 

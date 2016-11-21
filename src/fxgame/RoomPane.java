@@ -19,17 +19,17 @@ import javafx.scene.media.MediaPlayer;
 public class RoomPane {
 
 	private static final Pane pane = new Pane();
-
 	private static final Image bgImage = new Image("fxgame/images/room.png");
 
 	private static final MediaPlayer music = new MediaPlayer(
 		new Media(LabEight.class.getResource("audio/home.mp3").toString())
 	);
 
-	private static Brinn player;
+	private static final Brinn player = Game.getPlayer();
 	private static final Luffy dog = new Luffy();
 
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
+	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
 
@@ -40,11 +40,7 @@ public class RoomPane {
 		music.setVolume(0.6);
 		music.setCycleCount(AudioClip.INDEFINITE);
 
-		player = Game.getPlayer();
-		player.getImageView().setTranslateX(Game.WINDOW_WIDTH/2 - player.getWidth()/2);
-		player.getImageView().setTranslateY(Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
-		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
-		pane.getChildren().add(player.getImageView());
+		player.setPos(Game.WINDOW_WIDTH/2 - player.getWidth()/2, Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
 
 		sprites.add(player);
 		sprites.add(dog);
@@ -52,32 +48,22 @@ public class RoomPane {
 		Sprite table = new Sprite("fxgame/images/table.png", 70, 116);
 		table.setCBox(0, 14, table.getWidth()-3, 84);
 		table.setPos(131, 270);
-		table.getImageView().setX(table.getXPos());
-		table.getImageView().setY(table.getYPos());
 
 		Sprite bedTop = new Sprite("fxgame/images/bedtop.png", 72, 42);
 		bedTop.setCBox(4, 14, 64-3, 26);
 		bedTop.setPos(131, 133);
-		bedTop.getImageView().setX(bedTop.getXPos());
-		bedTop.getImageView().setY(bedTop.getYPos());
 
 		Sprite bedBottom = new Sprite("fxgame/images/bedbottom.png", 72, 18);
 		bedBottom.setCBox(4, 0, 64-3, 10);
 		bedBottom.setPos(131, 223);
-		bedBottom.getImageView().setX(bedBottom.getXPos());
-		bedBottom.getImageView().setY(bedBottom.getYPos());
 
 		Sprite leftWall = new Sprite("fxgame/images/roomleftwall.png", 281, 60);
 		leftWall.setCBox(0, 5, leftWall.getWidth(), leftWall.getHeight()-5);
 		leftWall.setPos(0, 420);
-		leftWall.getImageView().setX(leftWall.getXPos());
-		leftWall.getImageView().setY(leftWall.getYPos());
 
 		Sprite rightWall = new Sprite("fxgame/images/roomrightwall.png", 281, 60);
 		rightWall.setCBox(0, 5, rightWall.getWidth(), rightWall.getHeight()-5);
 		rightWall.setPos(359, 420);
-		rightWall.getImageView().setX(rightWall.getXPos());
-		rightWall.getImageView().setY(rightWall.getYPos());
 
 		sprites.add(table);
 		sprites.add(bedTop);
@@ -102,19 +88,19 @@ public class RoomPane {
 	public static Pane getPane() {
 		// Position player at room entrance unless start of game
 		// At start of game player is positioned at the center (from static initializer)
-		if (player.getYPos() > Game.WINDOW_HEIGHT/2 - player.getHeight()/2) {
-			player.setPos(302, 430);
-			player.getImageView().setTranslateX(player.getXPos());
-			player.getImageView().setTranslateY(player.getYPos());
-			pane.getChildren().add(player.getImageView());
-		}
+		if (player.getYPos() > Game.WINDOW_HEIGHT/2 - player.getHeight()/2)
+			player.setPos(302, Game.WINDOW_HEIGHT - PlayerController.OFFSCREEN_Y);
 
+		else
+			player.setPos(Game.WINDOW_WIDTH/2 - player.getWidth()/2, Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
+
+		pane.getChildren().add(player.getImageView());
+
+		// Position Luffy on dog bed
 		dog.setPos(423, 320);
-		dog.getImageView().setTranslateX(dog.getXPos());
-		dog.getImageView().setTranslateY(dog.getYPos());
 		dog.layLeft();
 
-		Game.getPlayerController().setVals(sprites, obstacles, exits);
+		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
 
 		music.play();
 

@@ -69,9 +69,8 @@ public class LabEight {
 		pane.setPrefSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 
 		// Set player starting position to center of pane
-		player.getImageView().setTranslateX(pane.getMinWidth()/2 - player.getWidth()/2);
-		player.getImageView().setTranslateY(pane.getMinHeight()/2 - player.getHeight()/2);
-		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
+		player.setXPos(pane.getMinWidth()/2 - player.getWidth()/2);
+		player.setYPos(pane.getMinHeight()/2 - player.getHeight()/2);
 		sprites.add(player);
 
 		// Initialize trees
@@ -128,13 +127,12 @@ public class LabEight {
 			pane.getChildren().add(tree.getImageView());
 			switch (i)
 			{
-			case 1: tree.getImageView().setX(180); tree.getImageView().setY(150); break;
-			case 2: tree.getImageView().setX(400); tree.getImageView().setY(100); break;
-			case 3: tree.getImageView().setX(100); tree.getImageView().setY(250); break;
-			case 4: tree.getImageView().setX(480); tree.getImageView().setY(300); break;
-			case 5: tree.getImageView().setX(40); tree.getImageView().setY(50); break;
+				case 1: tree.setPos(180, 150); break;
+				case 2: tree.setPos(400, 100); break;
+				case 3: tree.setPos(100, 250); break;
+				case 4: tree.setPos(480, 300); break;
+				case 5: tree.setPos(40, 50); break;
 			}
-			tree.setPos(tree.getImageView().getX(), tree.getImageView().getY());
 			sprites.add(tree);
 			obstacles.add(tree.getCBox());
 		}
@@ -158,17 +156,15 @@ public class LabEight {
 			monster.standFront();
 			switch (i)
 			{
-			case 1: monster.getImageView().setTranslateX(100); monster.getImageView().setTranslateY(150); break;
-			case 2: monster.getImageView().setTranslateX(300); monster.getImageView().setTranslateY(400); break;
-			case 3: monster.getImageView().setTranslateX(80); monster.getImageView().setTranslateY(180); break;
-			case 4: monster.getImageView().setTranslateX(600); monster.getImageView().setTranslateY(340); break;
-			case 5: monster.getImageView().setTranslateX(200); monster.getImageView().setTranslateY(40); break;
-			case 6: monster.getImageView().setTranslateX(520); monster.getImageView().setTranslateY(200); break;
-			case 7: monster.getImageView().setTranslateX(610); monster.getImageView().setTranslateY(0); break;
-			case 8: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(510); break;
-			default: monster.getImageView().setTranslateX(400); monster.getImageView().setTranslateY(510);
+				case 1: monster.setPos(100, 150); break;
+				case 2: monster.setPos(300, 400); break;
+				case 3: monster.setPos(80, 180); break;
+				case 4: monster.setPos(600, 340); break;
+				case 5: monster.setPos(200, 40); break;
+				case 6: monster.setPos(520, 200); break;
+				case 7: monster.setPos(610, 0); break;
+				default: monster.setPos(400, 480);
 			}
-			monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
 			i++;
 		}
 	}
@@ -177,15 +173,13 @@ public class LabEight {
 	private static void animatePlayer(double elapsedSeconds) {
 		double deltaX = elapsedSeconds * player.getXVelocity();
 		double deltaY = elapsedSeconds * player.getYVelocity();
-		double oldX = player.getImageView().getTranslateX();
+		double oldX = player.getXPos();
 		double newX = Math.max(0, Math.min(pane.getWidth() - player.getWidth(), oldX + deltaX));
-		double oldY = player.getImageView().getTranslateY();
+		double oldY = player.getYPos();
 		double newY = Math.max(0, Math.min(pane.getHeight() - player.getHeight(), oldY + deltaY));
 		boolean collision = checkForObstacleCollision(player, newX, newY);
 		if (!collision) {
-			player.getImageView().setTranslateX(newX);
-			player.getImageView().setTranslateY(newY);
-			player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
+			player.setPos(newX, newY);
 			reorderNodes();
 		}
 	}
@@ -195,15 +189,13 @@ public class LabEight {
 		for (AnimSprite monster : monsters) {
 			double sDeltaX = elapsedSeconds * monster.getXVelocity();
 			double sDeltaY = elapsedSeconds * monster.getYVelocity();
-			double sOldX = monster.getImageView().getTranslateX();
+			double sOldX = monster.getXPos();
 			double sNewX = Math.max(0, Math.min(pane.getWidth() - monster.getWidth(), sOldX + sDeltaX));
-			double sOldY = monster.getImageView().getTranslateY();
+			double sOldY = monster.getYPos();
 			double sNewY = Math.max(0, Math.min(pane.getHeight() - monster.getHeight(), sOldY + sDeltaY));
 			boolean sCollision = checkForObstacleCollision(monster, sNewX,sNewY);
 			if (!sCollision) {
-				monster.getImageView().setTranslateX(sNewX);
-				monster.getImageView().setTranslateY(sNewY);
-				monster.setPos(monster.getImageView().getTranslateX(), monster.getImageView().getTranslateY());
+				monster.setPos(sNewX, sNewY);
 				reorderNodes();
 			}
 			fixMonsterDirection(monster, sOldX + sDeltaX, sOldY + sDeltaY);
@@ -411,9 +403,8 @@ public class LabEight {
 
 		// Reset player position to center of pane
 		player.standFront();
-		player.getImageView().setTranslateX(pane.getMinWidth()/2 - player.getWidth()/2);
-		player.getImageView().setTranslateY(pane.getMinHeight()/2 - player.getHeight()/2);
-		player.setPos(player.getImageView().getTranslateX(), player.getImageView().getTranslateY());
+		player.setXPos(pane.getMinWidth()/2 - player.getWidth()/2);
+		player.setYPos(pane.getMinHeight()/2 - player.getHeight()/2);
 
 		// Reset monster positions
 		initMonsterPos();

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import fxgame.Game.GameState;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
@@ -14,6 +15,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.HBox;
@@ -85,6 +87,13 @@ public class PartOne {
 	}
 
 	public static Scene getScene() {
+		scene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.BACK_SPACE) {
+				stopMusic();
+				Game.setCurrentState(GameState.TITLE);
+				Game.getStage().setScene(TitleScene.getScene());
+			}
+		});
 		music.play();
 		return scene;
 	}

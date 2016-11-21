@@ -1,7 +1,7 @@
 package fxgame;
 
-import javafx.geometry.Rectangle2D;
 import javafx.scene.image.ImageView;
+import javafx.geometry.Rectangle2D;
 
 public class Sprite implements Comparable<Sprite> {
 
@@ -76,6 +76,7 @@ public class Sprite implements Comparable<Sprite> {
 
 	public void setXPos(double x) {
 		xPos = x;
+		sprite.setTranslateX(x);
 	}
 
 	public double getYPos() {
@@ -84,11 +85,14 @@ public class Sprite implements Comparable<Sprite> {
 
 	public void setYPos(double y) {
 		yPos = y;
+		sprite.setTranslateY(y);
 	}
 
 	public void setPos(double x, double y) {
 		setXPos(x);
 		setYPos(y);
+		sprite.setTranslateX(x);
+		sprite.setTranslateY(y);
 	}
 
 	public int getSpeed() {

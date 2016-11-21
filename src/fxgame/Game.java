@@ -2,7 +2,6 @@ package fxgame;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 public class Game extends Application {
@@ -10,11 +9,14 @@ public class Game extends Application {
 	public static final int WINDOW_WIDTH = 640;
 	public static final int WINDOW_HEIGHT = 480;
 
+	private static Stage stage;
 	private static Scene scene;
 
 	public static enum GameState {
 		TITLE, PART_ONE, LAB_EIGHT,
-		ROOM, HOME, EXIT_HOME, EXIT_HOME2
+		ROOM, HOME, EXIT_HOME, EXIT_HOME2, FORKED_PATH,
+		SKELETONS,
+		GAME_OVER
 	}
 
 	private static GameState currentState;
@@ -29,37 +31,9 @@ public class Game extends Application {
 	@Override
 	public void start(Stage stage) throws Exception {
 
+		Game.stage = stage;
 		currentState = GameState.TITLE;
 		stage.setScene(TitleScene.getScene());
-
-		// Press key on title screen to proceed
-		TitleScene.getScene().setOnKeyPressed(e -> {
-			TitleScene.stopMusic();
-			switch (e.getCode()) {
-				case P:
-					currentState = GameState.PART_ONE;
-					stage.setScene(PartOne.getScene());
-					PartOne.getScene().setOnKeyPressed(event -> {
-						if (event.getCode() == KeyCode.BACK_SPACE) {
-							PartOne.stopMusic();
-							currentState = GameState.TITLE;
-							stage.setScene(TitleScene.getScene());
-						}
-					});
-					break;
-				case L:
-					currentState = GameState.LAB_EIGHT;
-					stage.setScene(LabEight.getScene());
-					break;
-
-				case ENTER: case DIGIT2:
-					currentState = GameState.ROOM;
-					scene = new Scene(RoomPane.getPane(), WINDOW_WIDTH, WINDOW_HEIGHT);
-					pController.start();
-					stage.setScene(scene);
-				default: break;
-			}
-		});
 
 		stage.setTitle("The Cooling - JavaFX Game");
 		stage.setWidth(WINDOW_WIDTH);
@@ -81,6 +55,9 @@ public class Game extends Application {
 			case HOME: scene.setRoot(HomePane.getPane()); break;
 			case EXIT_HOME: scene.setRoot(ExitHomePane.getPane()); break;
 			case EXIT_HOME2: scene.setRoot(ExitHome2Pane.getPane()); break;
+			case FORKED_PATH: scene.setRoot(ForkedPathPane.getPane()); break;
+			case SKELETONS: scene.setRoot(SkeletonsPane.getPane()); break;
+			case GAME_OVER: scene.setRoot(GameOverPane.getPane()); break;
 			default: break;
 		}
 	}
@@ -97,8 +74,20 @@ public class Game extends Application {
 		return scene;
 	}
 
+	public static void setScene(Scene scene) {
+		Game.scene = scene;
+	}
+
 	public static GameState getCurrentState() {
 		return currentState;
+	}
+
+	public static void setCurrentState(GameState state) {
+		currentState = state;
+	}
+
+	public static Stage getStage() {
+		return stage;
 	}
 
 }

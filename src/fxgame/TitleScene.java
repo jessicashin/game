@@ -1,5 +1,6 @@
 package fxgame;
 
+import fxgame.Game.GameState;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -55,6 +56,28 @@ public class TitleScene {
 
 	public static Scene getScene() {
 		titleMusic.play();
+
+		scene.setOnKeyPressed(e -> {
+			TitleScene.stopMusic();
+			switch (e.getCode()) {
+				case P:
+					Game.setCurrentState(GameState.PART_ONE);
+					Game.getStage().setScene(PartOne.getScene());
+					break;
+				case L:
+					Game.setCurrentState(GameState.LAB_EIGHT);
+					Game.getStage().setScene(LabEight.getScene());
+					break;
+
+				case ENTER: case DIGIT2:
+					Game.setCurrentState(GameState.ROOM);
+					Game.setScene(new Scene(RoomPane.getPane(), Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT));
+					Game.getPlayerController().start();
+					Game.getStage().setScene(Game.getScene());
+				default: break;
+			}
+		});
+
 		return scene;
 	}
 

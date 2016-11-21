@@ -19,7 +19,6 @@ import javafx.scene.media.MediaPlayer;
 public class HomePane {
 
 	private static final Pane pane = new Pane();
-
 	private static final Image bgImage = new Image("fxgame/images/home.png");
 
 	private static final MediaPlayer music = new MediaPlayer(
@@ -28,6 +27,7 @@ public class HomePane {
 
 	private static Brinn player;
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
+	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
 
@@ -39,7 +39,7 @@ public class HomePane {
 		pane.setBackground(new Background(new BackgroundImage(bgImage, null, null, null, null)));
 
 		obstacles.add(new Rectangle2D(368, 320, 272, 160));		// right trees
-		obstacles.add(new Rectangle2D(0, 320, 232, 160));		// left trees
+		obstacles.add(new Rectangle2D(0, 320, 226, 160));		// left trees
 		obstacles.add(new Rectangle2D(195, 267, 200, 100));		// igloo
 
 		exits.put(KeyCode.DOWN, GameState.EXIT_HOME);
@@ -50,15 +50,13 @@ public class HomePane {
 
 	public static Pane getPane() {
 		// If coming from world, position player at bottom of pane
-		if (player.getYPos() < 0) { player.setYPos(430); }
+		if (player.getYPos() < 0) { player.setYPos(Game.WINDOW_HEIGHT - PlayerController.OFFSCREEN_Y); }
 		// If coming from room, position player at door of igloo
 		else { player.setPos(271, 337); }
 
-		player.getImageView().setTranslateX(player.getXPos());
-		player.getImageView().setTranslateY(player.getYPos());
 		pane.getChildren().add(player.getImageView());
 
-		Game.getPlayerController().setVals(sprites, obstacles, exits);
+		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
 
 		music.play();
 		return pane;

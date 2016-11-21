@@ -14,7 +14,7 @@ public class Tree extends Sprite {
 		this.setCBoxOffsetX(10);
 		this.setCBoxOffsetY(52);
 		this.setCBoxWidth(88);
-		this.setCBoxHeight(68);
+		this.setCBoxHeight(62);
 	}
 
 	public boolean hasFruit() {
