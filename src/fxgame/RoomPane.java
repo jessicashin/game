@@ -34,6 +34,8 @@ public class RoomPane {
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
 
 	static {
+		pane.setMinSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
+		pane.setMaxSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 		pane.setPrefSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 		pane.setBackground(new Background(new BackgroundImage(bgImage, null, null, null, null)));
 
@@ -86,13 +88,12 @@ public class RoomPane {
 	}
 
 	public static Pane getPane() {
-		// Position player at room entrance unless start of game
-		// At start of game player is positioned at the center (from static initializer)
-		if (player.getYPos() > Game.WINDOW_HEIGHT/2 - player.getHeight()/2)
-			player.setPos(302, Game.WINDOW_HEIGHT - PlayerController.OFFSCREEN_Y);
-
-		else
+		if (Game.getCurrentState() == GameState.TITLE || Game.getCurrentState() == GameState.GAME_OVER) {
 			player.setPos(Game.WINDOW_WIDTH/2 - player.getWidth()/2, Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
+			player.standFront();
+		}
+
+		else player.setPos(302, Game.WINDOW_HEIGHT - PlayerController.OFFSCREEN_Y);
 
 		pane.getChildren().add(player.getImageView());
 
@@ -101,6 +102,7 @@ public class RoomPane {
 		dog.layLeft();
 
 		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.setCurrentState(GameState.ROOM);
 
 		music.play();
 

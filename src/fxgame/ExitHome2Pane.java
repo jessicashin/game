@@ -50,8 +50,7 @@ public class ExitHome2Pane {
 	}
 
 	public static Pane getPane() {
-		// If coming from exit home, position player at right
-		if (player.getXPos() < 0) { player.setXPos(604); }
+		if (Game.getCurrentState() == GameState.EXIT_HOME) player.setXPos(604);
 		// If coming from forked path, position player at bottom
 		else {
 			if (player.getXPos() <= 366)
@@ -64,6 +63,7 @@ public class ExitHome2Pane {
 		pane.getChildren().add(player.getImageView());
 
 		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.setCurrentState(GameState.EXIT_HOME2);
 
 		return pane;
 	}

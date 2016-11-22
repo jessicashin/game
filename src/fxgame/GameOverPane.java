@@ -45,11 +45,13 @@ public class GameOverPane {
 		gameOverPane.setSpacing(50);
 		gameOverPane.setAlignment(Pos.CENTER);
 		gameOverPane.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
+		gameOverPane.setMinSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
+		gameOverPane.setMaxSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 		gameOverPane.setPrefSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 	}
 
 	public static Pane getPane() {
-		Game.getPlayerController().stop();
+		Game.setCurrentState(GameState.GAME_OVER);
 		gameOverSoundEffect.play();
 
 		// Play music after 3 seconds, once the game over sound effect finishes

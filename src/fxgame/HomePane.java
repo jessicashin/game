@@ -49,14 +49,14 @@ public class HomePane {
 	}
 
 	public static Pane getPane() {
-		// If coming from world, position player at bottom of pane
-		if (player.getYPos() < 0) { player.setYPos(Game.WINDOW_HEIGHT - PlayerController.OFFSCREEN_Y); }
-		// If coming from room, position player at door of igloo
-		else { player.setPos(271, 337); }
+		if (Game.getCurrentState() == GameState.ROOM)
+			player.setPos(272, 336); // igloo door
+		else player.setYPos(Game.WINDOW_HEIGHT - PlayerController.OFFSCREEN_Y);
 
 		pane.getChildren().add(player.getImageView());
 
 		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.setCurrentState(GameState.HOME);
 
 		music.play();
 		return pane;

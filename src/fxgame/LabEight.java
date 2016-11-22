@@ -1,6 +1,9 @@
 package fxgame;
 
 import java.util.Set;
+
+import fxgame.Game.GameState;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -61,7 +64,7 @@ public class LabEight {
 	private static final Set<KeyCode> keysPressed = new HashSet<KeyCode>();
 
 	static {
-		pane.setBackground(new Background(new BackgroundFill(Color.web("rgb(114,125,179)"), null, null)));
+		pane.setBackground(new Background(new BackgroundFill(Color.web("rgb(114,129,177)"), null, null)));
 
 		pane.getChildren().add(player.getImageView());
 		pane.setMinSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
@@ -69,8 +72,7 @@ public class LabEight {
 		pane.setPrefSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 
 		// Set player starting position to center of pane
-		player.setXPos(pane.getMinWidth()/2 - player.getWidth()/2);
-		player.setYPos(pane.getMinHeight()/2 - player.getHeight()/2);
+		player.setPos(Game.WINDOW_WIDTH/2 - player.getWidth()/2, Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
 		sprites.add(player);
 
 		// Initialize trees
@@ -78,6 +80,7 @@ public class LabEight {
 
 		// Initialize monsters
 		createMonsters();
+		setMonsterDirections();
 
 		music.setVolume(0.6);
 		music.setCycleCount(AudioClip.INDEFINITE);
@@ -100,19 +103,22 @@ public class LabEight {
 				lastUpdateTime.set(timestamp);
 			}
 		};
-		animationTimer.start();
-
-		// Start loop that controls monster walking directions
-		setMonsterDirections();
-
-		// Start key event handlers for player movement
-	    startKeyPressedEventHandler();
-		startKeyReleasedEventHandler();
 	}
 
 
 	public static Scene getScene() {
 		music.play();
+
+		// Set player starting position to center of pane
+		player.setPos(Game.WINDOW_WIDTH/2 - player.getWidth()/2, Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
+
+		// Start key event handlers for player movement
+	    startKeyPressedEventHandler();
+		startKeyReleasedEventHandler();
+
+		animationTimer.start();
+		monstersTimeline.play();
+
 		return scene;
 	}
 
@@ -140,7 +146,7 @@ public class LabEight {
 
 	// Initialize monsters and set their initial positions on the pane
 	private static void createMonsters() {
-		for (int i = 1; i <= 8; i++) {
+		for (int i = 1; i <= 6; i++) {
 			Skeleton skeleton = new Skeleton();
 			pane.getChildren().add(skeleton.getImageView());
 			sprites.add(skeleton);
@@ -156,14 +162,12 @@ public class LabEight {
 			monster.standFront();
 			switch (i)
 			{
-				case 1: monster.setPos(100, 150); break;
-				case 2: monster.setPos(300, 400); break;
-				case 3: monster.setPos(80, 180); break;
-				case 4: monster.setPos(600, 340); break;
-				case 5: monster.setPos(200, 40); break;
-				case 6: monster.setPos(520, 200); break;
-				case 7: monster.setPos(610, 0); break;
-				default: monster.setPos(400, 480);
+				case 1: monster.setPos(160, 28); break;
+				case 2: monster.setPos(42, 204); break;
+				case 3: monster.setPos(514, 44); break;
+				case 4: monster.setPos(44, 370); break;
+				case 5: monster.setPos(560, 152); break;
+				case 6: monster.setPos(430, 370); break;
 			}
 			i++;
 		}
@@ -174,9 +178,9 @@ public class LabEight {
 		double deltaX = elapsedSeconds * player.getXVelocity();
 		double deltaY = elapsedSeconds * player.getYVelocity();
 		double oldX = player.getXPos();
-		double newX = Math.max(0, Math.min(pane.getWidth() - player.getWidth(), oldX + deltaX));
+		double newX = Math.max(0, Math.min(Game.WINDOW_WIDTH - player.getWidth(), oldX + deltaX));
 		double oldY = player.getYPos();
-		double newY = Math.max(0, Math.min(pane.getHeight() - player.getHeight(), oldY + deltaY));
+		double newY = Math.max(0, Math.min(Game.WINDOW_HEIGHT - player.getHeight(), oldY + deltaY));
 		boolean collision = checkForObstacleCollision(player, newX, newY);
 		if (!collision) {
 			player.setPos(newX, newY);
@@ -190,9 +194,9 @@ public class LabEight {
 			double sDeltaX = elapsedSeconds * monster.getXVelocity();
 			double sDeltaY = elapsedSeconds * monster.getYVelocity();
 			double sOldX = monster.getXPos();
-			double sNewX = Math.max(0, Math.min(pane.getWidth() - monster.getWidth(), sOldX + sDeltaX));
+			double sNewX = Math.max(0, Math.min(Game.WINDOW_WIDTH - monster.getWidth(), sOldX + sDeltaX));
 			double sOldY = monster.getYPos();
-			double sNewY = Math.max(0, Math.min(pane.getHeight() - monster.getHeight(), sOldY + sDeltaY));
+			double sNewY = Math.max(0, Math.min(Game.WINDOW_HEIGHT - monster.getHeight(), sOldY + sDeltaY));
 			boolean sCollision = checkForObstacleCollision(monster, sNewX,sNewY);
 			if (!sCollision) {
 				monster.setPos(sNewX, sNewY);
@@ -221,7 +225,6 @@ public class LabEight {
 				new KeyFrame(Duration.seconds(2))
 		);
 		monstersTimeline.setCycleCount(Timeline.INDEFINITE);
-		monstersTimeline.play();
 	}
 
 	// Event handler for player movement using arrow keys
@@ -234,10 +237,24 @@ public class LabEight {
 				case RIGHT:	player.walkRight(); break;
 				case DOWN:	player.walkDown(); break;
 				case LEFT:	player.walkLeft(); break;
+
+				case BACK_SPACE:
+					music.stop();
+					animationTimer.stop();
+					monstersTimeline.stop();
+					keysPressed.clear();
+					player.standFront();
+					player.setXPos(pane.getMinWidth()/2 - player.getWidth()/2);
+					player.setYPos(pane.getMinHeight()/2 - player.getHeight()/2);
+					initMonsterPos();
+					Game.setCurrentState(GameState.TITLE);
+					Game.getStage().setScene(TitleScene.getScene());
+
 				default: break;
 			}
 
-			keysPressed.add(key);
+			if (key != KeyCode.BACK_SPACE)
+				keysPressed.add(key);
 		});
 	}
 
@@ -308,9 +325,7 @@ public class LabEight {
 		if (sprite != player) {
 			for (Sprite monster : monsters) {
 				if (monster != sprite) {
-					if (monster.getCBox().intersects(
-							newX + sprite.getCBoxOffsetX(), newY + sprite.getCBoxOffsetY(),
-							sprite.getCBoxWidth(), sprite.getCBoxHeight())) {
+					if (monster.getCBox().intersects(sprite.getNewCBox(newX, newY))) {
 						if (sprite == player) {
 							gameOver();
 						}
@@ -321,8 +336,7 @@ public class LabEight {
 		}
 		// Check for collisions with obstacles
 		for (Rectangle2D obstacle : obstacles) {
-			if (obstacle.intersects(newX + sprite.getCBoxOffsetX(), newY + sprite.getCBoxOffsetY(),
-					sprite.getCBoxWidth(), sprite.getCBoxHeight())) {
+			if (obstacle.intersects(sprite.getNewCBox(newX, newY))) {
 				return true;
 			}
 		}
@@ -371,6 +385,13 @@ public class LabEight {
 
 		gameOverSoundEffect.play();
 
+		// Reset player position to center of pane
+		player.standFront();
+		player.setPos(Game.WINDOW_WIDTH/2 - player.getWidth()/2, Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
+
+		// Reset monster positions
+		initMonsterPos();
+
 		// Play music after 3 seconds, once the game over sound effect finishes
 		Timeline delayMusic = new Timeline(new KeyFrame(Duration.seconds(3), e -> gameOverMusic.play()));
 
@@ -401,18 +422,10 @@ public class LabEight {
 		music.play();
 		gameOverMusic.stop();
 
-		// Reset player position to center of pane
-		player.standFront();
-		player.setXPos(pane.getMinWidth()/2 - player.getWidth()/2);
-		player.setYPos(pane.getMinHeight()/2 - player.getHeight()/2);
-
-		// Reset monster positions
-		initMonsterPos();
-
 		// Restart animations
+		startKeyPressedEventHandler();
 		animationTimer.start();
 		monstersTimeline.play();
-		startKeyPressedEventHandler();
 	}
 
 }

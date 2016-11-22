@@ -167,6 +167,14 @@ public class Sprite implements Comparable<Sprite> {
 		return new Rectangle2D(xPos + cBoxOffsetX, yPos + cBoxOffsetY, cBoxWidth, cBoxHeight);
 	}
 
+	public Rectangle2D getNewCBox(double newX, double newY) {
+		return new Rectangle2D(newX + cBoxOffsetX, newY + cBoxOffsetY, cBoxWidth, cBoxHeight);
+	}
+
+	public Rectangle2D getBounds() {
+		return new Rectangle2D(xPos, yPos, width, height);
+	}
+
 	@Override
 	public int compareTo(Sprite sprite) {
 		// Compares the top of each collision box (for sorting z-order of nodes)

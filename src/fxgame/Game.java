@@ -36,28 +36,20 @@ public class Game extends Application {
 		stage.setScene(TitleScene.getScene());
 
 		stage.setTitle("The Cooling - JavaFX Game");
-		stage.setWidth(WINDOW_WIDTH);
-		stage.setHeight(WINDOW_HEIGHT);
 		stage.setResizable(false);
 		stage.show();
 
 	}
 
 	public static void setPane(GameState state) {
-		switch (currentState) {
-			case ROOM: RoomPane.stopMusic(); break;
-			default: break;
-		}
-
-		currentState = state;
 		switch (state) {
 			case ROOM: scene.setRoot(RoomPane.getPane()); HomePane.stopMusic(); break;
-			case HOME: scene.setRoot(HomePane.getPane()); break;
+			case HOME: scene.setRoot(HomePane.getPane()); RoomPane.stopMusic(); break;
 			case EXIT_HOME: scene.setRoot(ExitHomePane.getPane()); break;
 			case EXIT_HOME2: scene.setRoot(ExitHome2Pane.getPane()); break;
 			case FORKED_PATH: scene.setRoot(ForkedPathPane.getPane()); break;
 			case SKELETONS: scene.setRoot(SkeletonsPane.getPane()); break;
-			case GAME_OVER: scene.setRoot(GameOverPane.getPane()); break;
+			case GAME_OVER: scene.setRoot(GameOverPane.getPane()); HomePane.stopMusic(); break;
 			default: break;
 		}
 	}

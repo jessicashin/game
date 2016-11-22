@@ -66,13 +66,14 @@ public class ForkedPathPane {
 	}
 
 	public static Pane getPane() {
-		if (player.getYPos() > Game.WINDOW_HEIGHT - player.getHeight())
+		if (Game.getCurrentState() == GameState.EXIT_HOME2)
 			player.setYPos(-PlayerController.OFFSCREEN_Y);
-		else if (player.getXPos() < 0)
+		else if (Game.getCurrentState() == GameState.SKELETONS)
 			player.setXPos(Game.WINDOW_WIDTH - PlayerController.OFFSCREEN_X);
 		pane.getChildren().add(player.getImageView());
 
 		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.setCurrentState(GameState.FORKED_PATH);
 
 		return pane;
 	}

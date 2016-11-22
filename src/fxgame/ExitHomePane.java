@@ -49,16 +49,13 @@ public class ExitHomePane {
 	}
 
 	public static Pane getPane() {
-		// If coming from home, position player at top of pane
-		if (player.getXPos() < Game.WINDOW_WIDTH - player.getWidth())
-			player.setYPos(-PlayerController.OFFSCREEN_Y);
-		// If coming from exit home 2, position player at left
-		else
-			player.setXPos(-PlayerController.OFFSCREEN_X);
+		if (Game.getCurrentState() == GameState.HOME) player.setYPos(-PlayerController.OFFSCREEN_Y);
+		else player.setXPos(-PlayerController.OFFSCREEN_X);
 
 		pane.getChildren().add(player.getImageView());
 
 		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.setCurrentState(GameState.EXIT_HOME);
 
 		return pane;
 	}

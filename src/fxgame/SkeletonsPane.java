@@ -88,11 +88,15 @@ public class SkeletonsPane {
 	}
 
 	public static Pane getPane() {
-		player.setXPos(-PlayerController.OFFSCREEN_X);
-		initMonsterPos();
+		if (Game.getCurrentState() == GameState.FORKED_PATH)
+			player.setXPos(-PlayerController.OFFSCREEN_X);
+
 		pane.getChildren().add(player.getImageView());
 
+		initMonsterPos();
+
 		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.setCurrentState(GameState.SKELETONS);
 
 		return pane;
 	}
@@ -119,7 +123,6 @@ public class SkeletonsPane {
 				case 3: monster.setPos(408, 154); break;
 				case 4: monster.setPos(468, 330); break;
 				case 5: monster.setPos(502, 210); break;
-				default: monster.setPos(502, 210);
 			}
 			i++;
 		}

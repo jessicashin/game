@@ -42,9 +42,6 @@ public class PlayerController {
 					double elapsedSeconds = (timestamp - lastUpdateTime.get()) / 1_000_000_000.0 ;
 					animatePlayer(elapsedSeconds);
 					animateMonsters(elapsedSeconds);
-
-					// Check if the player has collided with a monster
-					checkForMonsterCollision();
 				}
 				lastUpdateTime.set(timestamp);
 			}
@@ -56,10 +53,6 @@ public class PlayerController {
 		animationTimer.start();
 		startKeyPressedEventHandler();
 		startKeyReleasedEventHandler();
-	}
-
-	public void stop() {
-		animationTimer.stop();
 	}
 
 	public void setVals(List<Sprite> sprites, List<AnimSprite> monsters,
@@ -137,6 +130,9 @@ public class PlayerController {
 		if (newScene != null) {
 			Game.setPane(newScene);
 		}
+
+		// Check if the player has collided with a monster
+		checkForMonsterCollision(newX, newY);
 	}
 
 	// Animate the monsters movement based on their randomly set velocities
@@ -145,9 +141,13 @@ public class PlayerController {
 			double sDeltaX = elapsedSeconds * monster.getXVelocity();
 			double sDeltaY = elapsedSeconds * monster.getYVelocity();
 			double sOldX = monster.getXPos();
-			double sNewX = Math.max(0, Math.min(Game.WINDOW_WIDTH - monster.getWidth(), sOldX + sDeltaX));
+			double sNewX = Math.max(
+				0, Math.min(Game.WINDOW_WIDTH - player.getWidth() - monster.getWidth(), sOldX + sDeltaX)
+			);
 			double sOldY = monster.getYPos();
-			double sNewY = Math.max(0, Math.min(Game.WINDOW_HEIGHT - monster.getHeight(), sOldY + sDeltaY));
+			double sNewY = Math.max(
+				0, Math.min(Game.WINDOW_HEIGHT - player.getHeight() - monster.getHeight(), sOldY + sDeltaY)
+			);
 			boolean sCollision = checkForObstacleCollision(monster, sNewX,sNewY);
 			if (!sCollision) {
 				monster.setPos(sNewX, sNewY);
@@ -220,26 +220,29 @@ public class PlayerController {
 	private static boolean checkForObstacleCollision(Sprite sprite, double newX, double newY) {
 		for (Sprite s : sprites) {
 			if (s != sprite) {
-				if (s.getCBox().intersects(newX + sprite.getCBoxOffsetX(), newY + sprite.getCBoxOffsetY(),
-						sprite.getCBoxWidth(), sprite.getCBoxHeight())) {
+				if (s.getCBox().intersects(sprite.getNewCBox(newX, newY))) {
 					return true;
 				}
 			}
 		}
 		for (Rectangle2D obstacle : obstacles) {
-			if (obstacle.intersects(newX + sprite.getCBoxOffsetX(), newY + sprite.getCBoxOffsetY(),
-					sprite.getCBoxWidth(), sprite.getCBoxHeight())) {
+			if (obstacle.intersects(sprite.getNewCBox(newX, newY))) {
 				return true;
 			}
 		}
+
+		// Temporarily hard-coded for skeletons pane TODO
+		if (monsters.contains(sprite) && newX < 192 + player.getWidth())
+			return true;
+
 		return false;
 	}
 
 	// Check if player has collided with a monster and if so call game over
-	private static void checkForMonsterCollision() {
+	private static void checkForMonsterCollision(double newX, double newY) {
 		for (Sprite monster : monsters) {
-			if (monster.getCBox().intersects(player.getCBox())) {
-				System.out.println("GAME OVER");
+			if (monster.getCBox().intersects(player.getNewCBox(newX, newY))) {
+				Game.setPane(GameState.GAME_OVER);
 				break;
 			}
 		}

@@ -70,7 +70,6 @@ public class TitleScene {
 					break;
 
 				case ENTER: case DIGIT2:
-					Game.setCurrentState(GameState.ROOM);
 					Game.setScene(new Scene(RoomPane.getPane(), Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT));
 					Game.getPlayerController().start();
 					Game.getStage().setScene(Game.getScene());
