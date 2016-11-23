@@ -1,6 +1,7 @@
 package fxgame;
 
 import javafx.geometry.Rectangle2D;
+import javafx.scene.input.KeyCode;
 
 public class Luffy extends AnimSprite {
 
@@ -28,12 +29,12 @@ public class Luffy extends AnimSprite {
 	private final Rectangle2D faceBack = new Rectangle2D(0, BACK_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
 	private final Rectangle2D faceRight = new Rectangle2D(0, STAND_RIGHT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
 
-	private SpriteAnimation animation;
+	private KeyCode direction = KeyCode.DOWN;
 
 	Luffy() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
-		this.setSpeed(100);
-		this.setCBox(12, 9, 28, 22);
+		this.setSpeed(60);
+		this.setCBox(5, 13, 42, 12);
 	}
 
 
@@ -70,25 +71,33 @@ public class Luffy extends AnimSprite {
 	@Override
 	public void walkDown() {
 		super.walkDown();
-		animation.setOffsetY(FRONT_OFFSET_Y);
+		this.getAnimation().setOffsetY(FRONT_OFFSET_Y);
+		direction = KeyCode.DOWN;
 	}
 
 	@Override
 	public void walkLeft() {
 		super.walkLeft();
-		animation.setOffsetY(WALK_LEFT_OFFSET_Y);
+		this.getAnimation().setOffsetY(WALK_LEFT_OFFSET_Y);
+		direction = KeyCode.LEFT;
 	}
 
 	@Override
 	public void walkUp() {
 		super.walkUp();
-		animation.setOffsetY(BACK_OFFSET_Y);
+		this.getAnimation().setOffsetY(BACK_OFFSET_Y);
+		direction = KeyCode.UP;
 	}
 
 	@Override
 	public void walkRight() {
 		super.walkRight();
-		animation.setOffsetY(WALK_RIGHT_OFFSET_Y);
+		this.getAnimation().setOffsetY(WALK_RIGHT_OFFSET_Y);
+		direction = KeyCode.RIGHT;
+	}
+
+	public KeyCode getDirection() {
+		return direction;
 	}
 
 	public void eatItem(Sprite item) {

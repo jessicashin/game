@@ -49,8 +49,8 @@ public class ExitHomePane {
 	}
 
 	public static Pane getPane() {
-		if (Game.getCurrentState() == GameState.HOME) player.setYPos(-PlayerController.OFFSCREEN_Y);
-		else player.setXPos(-PlayerController.OFFSCREEN_X);
+		if (Game.getCurrentState() == GameState.HOME) player.setYPos(-Controller.OFFSCREEN_Y);
+		else player.setXPos(-Controller.OFFSCREEN_X);
 
 		pane.getChildren().add(player.getImageView());
 

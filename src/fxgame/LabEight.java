@@ -191,18 +191,18 @@ public class LabEight {
 	// Animate the monsters movement based on their randomly set velocities
 	private static void animateMonsters(double elapsedSeconds) {
 		for (AnimSprite monster : monsters) {
-			double sDeltaX = elapsedSeconds * monster.getXVelocity();
-			double sDeltaY = elapsedSeconds * monster.getYVelocity();
-			double sOldX = monster.getXPos();
-			double sNewX = Math.max(0, Math.min(Game.WINDOW_WIDTH - monster.getWidth(), sOldX + sDeltaX));
-			double sOldY = monster.getYPos();
-			double sNewY = Math.max(0, Math.min(Game.WINDOW_HEIGHT - monster.getHeight(), sOldY + sDeltaY));
-			boolean sCollision = checkForObstacleCollision(monster, sNewX,sNewY);
-			if (!sCollision) {
-				monster.setPos(sNewX, sNewY);
+			double deltaX = elapsedSeconds * monster.getXVelocity();
+			double deltaY = elapsedSeconds * monster.getYVelocity();
+			double oldX = monster.getXPos();
+			double newX = Math.max(0, Math.min(Game.WINDOW_WIDTH - monster.getWidth(), oldX + deltaX));
+			double oldY = monster.getYPos();
+			double newY = Math.max(0, Math.min(Game.WINDOW_HEIGHT - monster.getHeight(), oldY + deltaY));
+			boolean collision = checkForObstacleCollision(monster, newX,newY);
+			if (!collision) {
+				monster.setPos(newX, newY);
 				reorderNodes();
 			}
-			fixMonsterDirection(monster, sOldX + sDeltaX, sOldY + sDeltaY);
+			fixMonsterDirection(monster, oldX + deltaX, oldY + deltaY);
 		}
 	}
 

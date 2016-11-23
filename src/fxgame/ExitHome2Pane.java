@@ -57,7 +57,7 @@ public class ExitHome2Pane {
 				player.setXPos(366);
 			else if (player.getXPos() + player.getWidth() >= 464)
 				player.setXPos(464 - player.getWidth());
-			player.setYPos(Game.WINDOW_HEIGHT - PlayerController.OFFSCREEN_Y);
+			player.setYPos(Game.WINDOW_HEIGHT - Controller.OFFSCREEN_Y);
 		}
 
 		pane.getChildren().add(player.getImageView());

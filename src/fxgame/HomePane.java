@@ -51,7 +51,7 @@ public class HomePane {
 	public static Pane getPane() {
 		if (Game.getCurrentState() == GameState.ROOM)
 			player.setPos(272, 336); // igloo door
-		else player.setYPos(Game.WINDOW_HEIGHT - PlayerController.OFFSCREEN_Y);
+		else player.setYPos(Game.WINDOW_HEIGHT - Controller.OFFSCREEN_Y);
 
 		pane.getChildren().add(player.getImageView());
 

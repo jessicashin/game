@@ -26,7 +26,7 @@ public class RoomPane {
 	);
 
 	private static final Brinn player = Game.getPlayer();
-	private static final Luffy dog = new Luffy();
+	private static final Luffy dog = Game.getDog();
 
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
 	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
@@ -93,7 +93,7 @@ public class RoomPane {
 			player.standFront();
 		}
 
-		else player.setPos(302, Game.WINDOW_HEIGHT - PlayerController.OFFSCREEN_Y);
+		else player.setPos(302, Game.WINDOW_HEIGHT - Controller.OFFSCREEN_Y);
 
 		pane.getChildren().add(player.getImageView());
 

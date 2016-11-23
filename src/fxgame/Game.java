@@ -12,6 +12,8 @@ public class Game extends Application {
 	private static Stage stage;
 	private static Scene scene;
 
+	// Each of these is a pane representing one part of the world view
+	// (PART_ONE and LAB_EIGHT are scenes)
 	public static enum GameState {
 		TITLE, PART_ONE, LAB_EIGHT,
 		ROOM, HOME, EXIT_HOME, EXIT_HOME2, FORKED_PATH,
@@ -21,8 +23,11 @@ public class Game extends Application {
 
 	private static GameState currentState;
 
+	// These are static across the whole game
+	// The pane classes refer to these instances
 	private static final Brinn player = new Brinn();
-	private static final PlayerController pController = new PlayerController();
+	private static final Luffy dog = new Luffy();
+	private static final Controller controller = new Controller();
 
 	public static void main(String[] args) {
 		Application.launch(args);
@@ -58,8 +63,12 @@ public class Game extends Application {
 		return player;
 	}
 
-	public static PlayerController getPlayerController() {
-		return pController;
+	public static Luffy getDog() {
+		return dog;
+	}
+
+	public static Controller getPlayerController() {
+		return controller;
 	}
 
 	public static Scene getScene() {

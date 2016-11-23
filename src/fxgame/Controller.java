@@ -15,12 +15,18 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 
-public class PlayerController {
+// This class controls the player movement (from key events),
+// the monster movements (random), and the dog movement (follows player).
+// It takes into account all the sprites and obstacles and exits
+// defined by each pane
+
+public class Controller {
 
 	private static final Random RANDOM = new Random();
 
 	private static Scene scene;
 	private static Brinn player = Game.getPlayer();
+	private static Luffy dog = Game.getDog();
 
 	private static List<Sprite> sprites;
 	private static List<AnimSprite> monsters;
@@ -34,7 +40,7 @@ public class PlayerController {
 	public static final int OFFSCREEN_X = 19;
 	public static final int OFFSCREEN_Y = 31;
 
-	PlayerController() {
+	Controller() {
 		animationTimer = new AnimationTimer() {
 			@Override
 			public void handle(long timestamp) {
@@ -42,6 +48,9 @@ public class PlayerController {
 					double elapsedSeconds = (timestamp - lastUpdateTime.get()) / 1_000_000_000.0 ;
 					animatePlayer(elapsedSeconds);
 					animateMonsters(elapsedSeconds);
+					if (Game.getCurrentState() == GameState.ROOM)
+						animateDog(elapsedSeconds);
+					reorderNodes();
 				}
 				lastUpdateTime.set(timestamp);
 			}
@@ -57,10 +66,10 @@ public class PlayerController {
 
 	public void setVals(List<Sprite> sprites, List<AnimSprite> monsters,
 			List<Rectangle2D> obstacles, Map<KeyCode, GameState> exits) {
-		PlayerController.sprites = sprites;
-		PlayerController.monsters = monsters;
-		PlayerController.obstacles = obstacles;
-		PlayerController.exits = exits;
+		Controller.sprites = sprites;
+		Controller.monsters = monsters;
+		Controller.obstacles = obstacles;
+		Controller.exits = exits;
 	}
 
 	private static final Set<KeyCode> keysPressed = new HashSet<KeyCode>();
@@ -120,10 +129,8 @@ public class PlayerController {
 		double oldY = player.getYPos();
 		double newY = Math.max(0 - OFFSCREEN_Y, Math.min(scene.getHeight() - OFFSCREEN_Y, oldY + deltaY));
 
-		boolean collision = checkForObstacleCollision(player, newX, newY);
-		if (!collision) {
+		if (!checkForObstacleCollision(player, newX, newY)) {
 			player.setPos(newX, newY);
-			reorderNodes();
 		}
 
 		GameState newScene = checkIfExit(newX, newY);
@@ -135,25 +142,61 @@ public class PlayerController {
 		checkForMonsterCollision(newX, newY);
 	}
 
+	// Animate the dog to follow the player around their room
+	private static void animateDog(double elapsedSeconds) {
+		double oldX = dog.getXPos();
+		double oldY = dog.getYPos();
+		double deltaX = 0;
+		double deltaY = 0;
+		if (player.getYPos() + player.getHeight() < dog.getYPos() + dog.getCBoxOffsetY()) {
+			deltaY = elapsedSeconds * -dog.getSpeed();
+			dog.walkUp();
+		}
+		else if (player.getYPos() - dog.getCBoxHeight() > dog.getYPos()) {
+			deltaY = elapsedSeconds * dog.getSpeed();
+			dog.walkDown();
+		}
+		if (player.getXPos() + player.getWidth() < dog.getXPos()) {
+			deltaX = elapsedSeconds * -dog.getSpeed();
+			dog.walkLeft();
+		}
+		else if (player.getXPos() - dog.getWidth() > dog.getXPos()) {
+			deltaX = elapsedSeconds * dog.getSpeed();
+			dog.walkRight();
+		}
+		if (deltaX == 0 && deltaY == 0) {
+			switch(dog.getDirection())
+			{
+				case UP: dog.standBack(); break;
+				case RIGHT: dog.standRight(); break;
+				case DOWN: dog.standFront(); break;
+				case LEFT: dog.standLeft(); break;
+				default: break;
+			}
+		}
+		double newX = Math.max(0 - OFFSCREEN_X, Math.min(scene.getWidth() - OFFSCREEN_X, oldX + deltaX));
+		double newY = Math.max(0 - OFFSCREEN_Y, Math.min(scene.getHeight() - OFFSCREEN_Y, oldY + deltaY));
+		if (!checkForObstacleCollision(dog, newX, newY))
+			dog.setPos(newX, newY);
+	}
+
 	// Animate the monsters movement based on their randomly set velocities
 	private static void animateMonsters(double elapsedSeconds) {
 		for (AnimSprite monster : monsters) {
-			double sDeltaX = elapsedSeconds * monster.getXVelocity();
-			double sDeltaY = elapsedSeconds * monster.getYVelocity();
-			double sOldX = monster.getXPos();
-			double sNewX = Math.max(
-				0, Math.min(Game.WINDOW_WIDTH - player.getWidth() - monster.getWidth(), sOldX + sDeltaX)
+			double deltaX = elapsedSeconds * monster.getXVelocity();
+			double deltaY = elapsedSeconds * monster.getYVelocity();
+			double oldX = monster.getXPos();
+			double newX = Math.max(
+				0, Math.min(Game.WINDOW_WIDTH - player.getWidth() - monster.getWidth(), oldX + deltaX)
 			);
-			double sOldY = monster.getYPos();
-			double sNewY = Math.max(
-				0, Math.min(Game.WINDOW_HEIGHT - player.getHeight() - monster.getHeight(), sOldY + sDeltaY)
+			double oldY = monster.getYPos();
+			double newY = Math.max(
+				0, Math.min(Game.WINDOW_HEIGHT - player.getHeight() - monster.getHeight(), oldY + deltaY)
 			);
-			boolean sCollision = checkForObstacleCollision(monster, sNewX,sNewY);
-			if (!sCollision) {
-				monster.setPos(sNewX, sNewY);
-				reorderNodes();
+			if (!checkForObstacleCollision(monster, newX, newY)) {
+				monster.setPos(newX, newY);
 			}
-			fixMonsterDirection(monster, sOldX + sDeltaX, sOldY + sDeltaY);
+			fixMonsterDirection(monster, oldX + deltaX, oldY + deltaY);
 		}
 	}
 

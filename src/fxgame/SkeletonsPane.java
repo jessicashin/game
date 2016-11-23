@@ -89,7 +89,7 @@ public class SkeletonsPane {
 
 	public static Pane getPane() {
 		if (Game.getCurrentState() == GameState.FORKED_PATH)
-			player.setXPos(-PlayerController.OFFSCREEN_X);
+			player.setXPos(-Controller.OFFSCREEN_X);
 
 		pane.getChildren().add(player.getImageView());
 
