@@ -71,11 +71,12 @@ public class GameOverPane {
 		);
 
 		// Let key press restart game after 3 seconds on the game over pane
-		Timeline delayRestart = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
+		Timeline delayRestart = new Timeline(new KeyFrame(Duration.millis(3100), event -> {
 			Game.getScene().setOnKeyPressed(e -> {
 				if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.DIGIT2) {
 					gameOverMusic.stop();
-					Game.setPane(GameState.ROOM);
+					if (Game.getCurrentState() == GameState.GAME_OVER)
+						Game.setPane(GameState.ROOM);
 					Game.getPlayerController().start();
 				}
 			});
