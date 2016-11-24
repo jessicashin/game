@@ -28,6 +28,7 @@ public class SkeletonsPane {
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
 	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
+	private static final List<InteractionBox> interactions = new ArrayList<InteractionBox>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
 
 	private static final Timeline monstersTimeline = new Timeline(
@@ -95,7 +96,7 @@ public class SkeletonsPane {
 
 		initMonsterPos();
 
-		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.SKELETONS);
 
 		return pane;

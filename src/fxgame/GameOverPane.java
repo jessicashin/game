@@ -8,6 +8,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
@@ -33,15 +34,21 @@ public class GameOverPane {
 	static {
 		gameOverMusic.setVolume(0.5);
 
+		StackPane gameOverStack = new StackPane();
+		Text gameOverBack = new Text("game over");
+		gameOverBack.setFill(Color.WHITE);
+		gameOverBack.setOpacity(0.5);
+		gameOverBack.setFont(Font.loadFont(LabEight.class.getResourceAsStream("fonts/MonsterFriendBack.otf"), 50));
 		Text gameOverText = new Text("game over");
 		gameOverText.setFill(Color.WHITE);
 		gameOverText.setFont(Font.loadFont(LabEight.class.getResourceAsStream("fonts/MonsterFriendFore.otf"), 50));
+		gameOverStack.getChildren().addAll(gameOverBack, gameOverText);
 
 		// Instructions for restarting the game (starts out hidden)
 		restartText.setFill(Color.BLACK);
 		restartText.setFont(Font.loadFont(LabEight.class.getResourceAsStream("fonts/DTM-Mono.otf"), 20));
 
-		gameOverPane.getChildren().addAll(gameOverText, restartText);
+		gameOverPane.getChildren().addAll(gameOverStack, restartText);
 		gameOverPane.setSpacing(50);
 		gameOverPane.setAlignment(Pos.CENTER);
 		gameOverPane.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));

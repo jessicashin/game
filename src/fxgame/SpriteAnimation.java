@@ -60,4 +60,9 @@ public class SpriteAnimation extends Transition {
     public void setOffsetY(double offset) {
     	offsetY = offset;
     }
+
+    public void setDuration(Duration duration) {
+    	if (getCycleDuration() != duration)
+    		setCycleDuration(duration);
+    }
 }

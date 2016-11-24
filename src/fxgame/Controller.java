@@ -14,6 +14,8 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Pane;
+import javafx.scene.media.AudioClip;
 
 // This class controls the player movement (from key events),
 // the monster movements (random), and the dog movement (follows player).
@@ -31,7 +33,13 @@ public class Controller {
 	private static List<Sprite> sprites;
 	private static List<AnimSprite> monsters;
 	private static List<Rectangle2D> obstacles;
+	private static List<InteractionBox> interactions;
 	private static Map<KeyCode, GameState> exits;
+
+	private static Pane currentModalPane = null;
+	private static final AudioClip textSoundEffect = new AudioClip(
+		Controller.class.getResource("audio/text.wav").toString()
+	);
 
 	private static AnimationTimer animationTimer;
 	private static final LongProperty lastUpdateTime = new SimpleLongProperty();
@@ -41,6 +49,7 @@ public class Controller {
 	public static final int OFFSCREEN_Y = 31;
 
 	Controller() {
+		textSoundEffect.setVolume(4);
 		animationTimer = new AnimationTimer() {
 			@Override
 			public void handle(long timestamp) {
@@ -64,11 +73,12 @@ public class Controller {
 		startKeyReleasedEventHandler();
 	}
 
-	public void setVals(List<Sprite> sprites, List<AnimSprite> monsters,
-			List<Rectangle2D> obstacles, Map<KeyCode, GameState> exits) {
+	public void setVals(List<Sprite> sprites, List<AnimSprite> monsters, List<Rectangle2D> obstacles,
+			List<InteractionBox> interactions, Map<KeyCode, GameState> exits) {
 		Controller.sprites = sprites;
 		Controller.monsters = monsters;
 		Controller.obstacles = obstacles;
+		Controller.interactions = interactions;
 		Controller.exits = exits;
 	}
 
@@ -84,6 +94,7 @@ public class Controller {
 				case RIGHT:	player.walkRight(); break;
 				case DOWN:	player.walkDown(); break;
 				case LEFT:	player.walkLeft(); break;
+				case Z:		checkIfInteracting(); break;
 				default: break;
 			}
 
@@ -174,8 +185,8 @@ public class Controller {
 				default: break;
 			}
 		}
-		double newX = Math.max(0 - OFFSCREEN_X, Math.min(scene.getWidth() - OFFSCREEN_X, oldX + deltaX));
-		double newY = Math.max(0 - OFFSCREEN_Y, Math.min(scene.getHeight() - OFFSCREEN_Y, oldY + deltaY));
+		double newX = Math.max(0 + OFFSCREEN_X*2, Math.min(scene.getWidth() - OFFSCREEN_X*2, oldX + deltaX));
+		double newY = Math.max(0 + OFFSCREEN_Y*2, Math.min(scene.getHeight() - OFFSCREEN_Y*2, oldY + deltaY));
 		if (!checkForObstacleCollision(dog, newX, newY))
 			dog.setPos(newX, newY);
 	}
@@ -196,35 +207,37 @@ public class Controller {
 			if (!checkForObstacleCollision(monster, newX, newY)) {
 				monster.setPos(newX, newY);
 			}
-			fixMonsterDirection(monster, oldX + deltaX, oldY + deltaY);
+			if (monster.getXPos() != oldX + deltaX || monster.getYPos() != oldY + deltaY) {
+				fixMonsterDirection(monster);
+			}
 		}
 	}
 
 	// Change direction if obstacle collision
-	private static void fixMonsterDirection(AnimSprite monster, double desiredX, double desiredY) {
+	private static void fixMonsterDirection(AnimSprite monster) {
 		int randomDirection = RANDOM.nextInt(3);
-		if (monster.getXPos() < desiredX) {
+		if (monster.isFacingRight()) {
 			switch(randomDirection) {
 				case 0: monster.walkDown(); break;
 				case 1: monster.walkUp(); break;
 				case 2: monster.walkLeft();
 			}
 		}
-		else if (monster.getXPos() > desiredX) {
+		else if (monster.isFacingLeft()) {
 			switch(randomDirection) {
 				case 0: monster.walkDown(); break;
 				case 1: monster.walkUp(); break;
 				case 2: monster.walkRight();
 			}
 		}
-		else if (monster.getYPos() < desiredY) {
+		else if (monster.isFacingDown()) {
 			switch(randomDirection) {
 				case 0: monster.walkLeft(); break;
 				case 1: monster.walkUp(); break;
 				case 2: monster.walkRight();
 			}
 		}
-		else if (monster.getYPos() > desiredY) {
+		else if (monster.isFacingUp()) {
 			switch(randomDirection) {
 				case 0: monster.walkDown(); break;
 				case 1: monster.walkLeft(); break;
@@ -233,27 +246,54 @@ public class Controller {
 		}
 	}
 
+	// Check if player is facing something that can be interacted with
+	private static void checkIfInteracting() {
+		for (InteractionBox box : interactions) {
+			if (player.getCBox().intersects(box.getBox()) && player.getDirection() == box.getDirection()) {
+				Game.addModalPane(box.getModalPane());
+				textSoundEffect.play();
+				currentModalPane = box.getModalPane();
+				switch(player.getDirection()) {
+					case UP:	player.standBack(); break;
+					case RIGHT:	player.standRight(); break;
+					case DOWN:	player.standFront(); break;
+					case LEFT:	player.standLeft(); break;
+					default: break;
+				}
+				scene.setOnKeyReleased(e -> {});
+				scene.setOnKeyPressed(e -> {
+					if (e.getCode() == KeyCode.Z) {
+						Game.removeModalPane(box.getModalPane());
+						textSoundEffect.play();
+						currentModalPane = null;
+						keysPressed.clear();
+						startKeyPressedEventHandler();
+						startKeyReleasedEventHandler();
+					}
+				});
+			}
+		}
+	}
+
 	// Check if player is exiting scene
 	private static GameState checkIfExit(double x, double y) {
-		if (keysPressed.contains(KeyCode.UP) && exits.containsKey(KeyCode.UP)
-				&& y == 0 - OFFSCREEN_Y)
+		if (y == 0 - OFFSCREEN_Y && exits.containsKey(KeyCode.UP) && player.isFacingUp())
 			return exits.get(KeyCode.UP);
 
-		else if (keysPressed.contains(KeyCode.RIGHT) && exits.containsKey(KeyCode.RIGHT)
-				&& x == scene.getWidth() - OFFSCREEN_X)
+		else if (x == scene.getWidth() - OFFSCREEN_X && exits.containsKey(KeyCode.RIGHT)
+				&& player.isFacingRight())
 			return exits.get(KeyCode.RIGHT);
 
-		else if (keysPressed.contains(KeyCode.DOWN) && exits.containsKey(KeyCode.DOWN)
-				&& y == scene.getHeight() - OFFSCREEN_Y)
+		else if (y == scene.getHeight() - OFFSCREEN_Y && exits.containsKey(KeyCode.DOWN)
+				&& player.isFacingDown())
 			return exits.get(KeyCode.DOWN);
 
-		else if (keysPressed.contains(KeyCode.LEFT) && exits.containsKey(KeyCode.LEFT)
-				&& x == 0 - OFFSCREEN_X)
+		else if (x == 0 - OFFSCREEN_X && exits.containsKey(KeyCode.LEFT) && player.isFacingLeft())
 			return exits.get(KeyCode.LEFT);
 
 		// If igloo door, change to room scene
-		else if (Game.getCurrentState() == GameState.HOME && keysPressed.contains(KeyCode.UP)
-				&& x > 256 && x < 294 && y < 340)
+		else if (x > 256 && x < 294 && y < 340 && Game.getCurrentState() == GameState.HOME
+				&& player.isFacingUp())
 			return GameState.ROOM;
 
 		return null;
@@ -297,6 +337,8 @@ public class Controller {
 		for (Sprite sprite : sprites) {
 			sprite.getImageView().toFront();
 		}
+		if (currentModalPane != null)
+			currentModalPane.toFront();
 	}
 
 }

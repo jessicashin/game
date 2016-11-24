@@ -2,6 +2,7 @@ package fxgame;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class Game extends Application {
@@ -55,6 +56,28 @@ public class Game extends Application {
 			case FORKED_PATH: scene.setRoot(ForkedPathPane.getPane()); break;
 			case SKELETONS: scene.setRoot(SkeletonsPane.getPane()); break;
 			case GAME_OVER: scene.setRoot(GameOverPane.getPane()); HomePane.stopMusic(); break;
+			default: break;
+		}
+	}
+
+	public static void addModalPane(Pane modalPane) {
+		switch (currentState) {
+			case ROOM: RoomPane.addModalPane(modalPane); break;
+			case EXIT_HOME: ExitHomePane.addModalPane(modalPane); break;
+			case EXIT_HOME2: ExitHome2Pane.addModalPane(modalPane); break;
+			case FORKED_PATH: ForkedPathPane.addModalPane(modalPane); break;
+			case SKELETONS: break;
+			default: break;
+		}
+	}
+
+	public static void removeModalPane(Pane modalPane) {
+		switch (currentState) {
+			case ROOM: RoomPane.removeModalPane(modalPane); break;
+			case EXIT_HOME: ExitHomePane.removeModalPane(modalPane); break;
+			case EXIT_HOME2: ExitHome2Pane.removeModalPane(modalPane); break;
+			case FORKED_PATH: ForkedPathPane.removeModalPane(modalPane); break;
+			case SKELETONS: break;
 			default: break;
 		}
 	}

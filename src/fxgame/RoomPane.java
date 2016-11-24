@@ -32,6 +32,7 @@ public class RoomPane {
 	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
+	private static final List<InteractionBox> interactions = new ArrayList<InteractionBox>();
 
 	static {
 		pane.setMinSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
@@ -52,11 +53,11 @@ public class RoomPane {
 		table.setPos(131, 270);
 
 		Sprite bedTop = new Sprite("fxgame/images/bedtop.png", 72, 42);
-		bedTop.setCBox(4, 14, 64-3, 26);
+		bedTop.setCBox(4, 14, 64-3, 24);
 		bedTop.setPos(131, 133);
 
 		Sprite bedBottom = new Sprite("fxgame/images/bedbottom.png", 72, 18);
-		bedBottom.setCBox(4, 0, 64-3, 10);
+		bedBottom.setCBox(4, 1, 64-3, 9);
 		bedBottom.setPos(131, 223);
 
 		Sprite leftWall = new Sprite("fxgame/images/roomleftwall.png", 281, 60);
@@ -84,6 +85,17 @@ public class RoomPane {
 			leftWall.getImageView(), rightWall.getImageView(), dog.getImageView()
 		);
 
+		InteractionBox bookshelf = new InteractionBox(
+			new Rectangle2D(300, 166, 90, 1), KeyCode.UP,
+			"You have many books. They are well worn and loved.\n"
+		);
+		InteractionBox drawers = new InteractionBox(
+			new Rectangle2D(424, 158, 78, 1), KeyCode.UP,
+			"Your drawers are empty!\n\n"
+		);
+		interactions.add(bookshelf);
+		interactions.add(drawers);
+
 		exits.put(KeyCode.DOWN, GameState.HOME);
 	}
 
@@ -101,12 +113,20 @@ public class RoomPane {
 		dog.setPos(423, 320);
 		dog.layLeft();
 
-		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.ROOM);
 
 		music.play();
 
 		return pane;
+	}
+
+	public static void addModalPane(Pane modalPane) {
+		pane.getChildren().add(modalPane);
+	}
+
+	public static void removeModalPane(Pane modalPane) {
+		pane.getChildren().remove(modalPane);
 	}
 
 	public static void stopMusic() {

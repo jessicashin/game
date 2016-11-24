@@ -22,6 +22,7 @@ public class ForkedPathPane {
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
 	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
+	private static final List<InteractionBox> interactions = new ArrayList<InteractionBox>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
 
 	static {
@@ -33,6 +34,12 @@ public class ForkedPathPane {
 		Sprite sign = new Sign();
 		sign.setPos(510, 190);
 		sprites.add(sign);
+
+		InteractionBox readSign = new InteractionBox(
+			new Rectangle2D(520, 230, 20, 2), KeyCode.UP,
+			"Hint: Press X to fight enemies.\n\n"
+		);
+		interactions.add(readSign);
 
 		Sprite bottomTrees = new Sprite("fxgame/images/forkedpathtrees.png", 640, 200);
 		bottomTrees.setCBox(0, 172, bottomTrees.getWidth(), bottomTrees.getHeight() - 172);
@@ -72,10 +79,18 @@ public class ForkedPathPane {
 			player.setXPos(Game.WINDOW_WIDTH - Controller.OFFSCREEN_X);
 		pane.getChildren().add(player.getImageView());
 
-		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.FORKED_PATH);
 
 		return pane;
+	}
+
+	public static void addModalPane(Pane modalPane) {
+		pane.getChildren().add(modalPane);
+	}
+
+	public static void removeModalPane(Pane modalPane) {
+		pane.getChildren().remove(modalPane);
 	}
 
 }

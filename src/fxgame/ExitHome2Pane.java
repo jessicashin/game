@@ -12,6 +12,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 public class ExitHome2Pane {
 
@@ -23,6 +25,7 @@ public class ExitHome2Pane {
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
 	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
+	private static final List<InteractionBox> interactions = new ArrayList<InteractionBox>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
 
 	static {
@@ -34,6 +37,17 @@ public class ExitHome2Pane {
 		Sprite sign = new Sign();
 		sign.setPos(378, 174);
 		sprites.add(sign);
+
+		Text signText = new Text("Turn back South. Danger past this point...\n");
+		signText.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/PapyrusUT.ttf"), 26));
+		signText.setLineSpacing(15);
+		Text signComment = new Text("\n\n(What an intimidating sign!)");
+		signComment.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/DTM-Mono.otf"), 24));
+		signComment.setLineSpacing(10);
+		InteractionBox readSign = new InteractionBox(
+			new Rectangle2D(388, 214, 20, 2), KeyCode.UP, signText, signComment
+		);
+		interactions.add(readSign);
 
 		Sprite trees = new Sprite("fxgame/images/exithome2trees.png", 180, 200);
 		trees.setCBox(4, 52, trees.getWidth() - 4, trees.getHeight() - 52);
@@ -62,10 +76,18 @@ public class ExitHome2Pane {
 
 		pane.getChildren().add(player.getImageView());
 
-		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.EXIT_HOME2);
 
 		return pane;
+	}
+
+	public static void addModalPane(Pane modalPane) {
+		pane.getChildren().add(modalPane);
+	}
+
+	public static void removeModalPane(Pane modalPane) {
+		pane.getChildren().remove(modalPane);
 	}
 
 }

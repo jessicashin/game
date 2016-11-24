@@ -12,6 +12,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 public class ExitHomePane {
 
@@ -22,6 +24,7 @@ public class ExitHomePane {
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
 	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
+	private static final List<InteractionBox> interactions = new ArrayList<InteractionBox>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
 
 	static {
@@ -33,6 +36,14 @@ public class ExitHomePane {
 		Sprite sign = new Sign();
 		sign.setPos(217, 183);
 		sprites.add(sign);
+
+		Text signText = new Text("This is your final warning. BEWARE OF DOG\n");
+		signText.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/PapyrusUT.ttf"), 28));
+		signText.setLineSpacing(15);
+		InteractionBox readSign = new InteractionBox(
+			new Rectangle2D(227, 223, 20, 2), KeyCode.UP, signText
+		);
+		interactions.add(readSign);
 
 		Sprite trees = new Sprite("fxgame/images/exithometrees.png", 479, 200);
 		trees.setCBox(0, 52, trees.getWidth(), trees.getHeight() - 52);
@@ -54,10 +65,18 @@ public class ExitHomePane {
 
 		pane.getChildren().add(player.getImageView());
 
-		Game.getPlayerController().setVals(sprites, monsters, obstacles, exits);
+		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.EXIT_HOME);
 
 		return pane;
+	}
+
+	public static void addModalPane(Pane modalPane) {
+		pane.getChildren().add(modalPane);
+	}
+
+	public static void removeModalPane(Pane modalPane) {
+		pane.getChildren().remove(modalPane);
 	}
 
 }

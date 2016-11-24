@@ -2,6 +2,7 @@ package fxgame;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.input.KeyCode;
+import javafx.util.Duration;
 
 public class Luffy extends AnimSprite {
 
@@ -11,93 +12,92 @@ public class Luffy extends AnimSprite {
 	private static final int SPRITE_HEIGHT = 40;
 	private static final int SPRITE_COUNT = 4;
 	private static final int SPRITE_COLUMNS = 4;
-	private static final int ANIM_DURATION = 500;
+	private static final int ANIM_DURATION = 600;
 
 	private static final int FRONT_OFFSET_Y = 0;
 	private static final int STAND_LEFT_OFFSET_Y = SPRITE_HEIGHT;
 	private static final int LAY_LEFT_OFFSET_Y = SPRITE_HEIGHT*2;
 	private static final int WALK_LEFT_OFFSET_Y = SPRITE_HEIGHT*3;
-	private static final int BACK_OFFSET_Y = SPRITE_HEIGHT*4;
+	private static final int WALK_BACK_OFFSET_Y = SPRITE_HEIGHT*4;
 	private static final int STAND_RIGHT_OFFSET_Y = SPRITE_HEIGHT*5;
 	private static final int LAY_RIGHT_OFFSET_Y = SPRITE_HEIGHT*6;
 	private static final int WALK_RIGHT_OFFSET_Y = SPRITE_HEIGHT*7;
+	private static final int STAND_BACK_OFFSET_Y = SPRITE_HEIGHT*8;
 
 	private final Rectangle2D layLeft = new Rectangle2D(0, LAY_LEFT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
 	private final Rectangle2D layRight = new Rectangle2D(0, LAY_RIGHT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
 	private final Rectangle2D faceFront = new Rectangle2D(0, FRONT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
-	private final Rectangle2D faceLeft = new Rectangle2D(0, STAND_LEFT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
-	private final Rectangle2D faceBack = new Rectangle2D(0, BACK_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
-	private final Rectangle2D faceRight = new Rectangle2D(0, STAND_RIGHT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
-
-	private KeyCode direction = KeyCode.DOWN;
 
 	Luffy() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
 		this.setSpeed(60);
-		this.setCBox(5, 13, 42, 12);
+		this.setCBox(6, 18, 40, 5);
 	}
 
 
 	public void layLeft() {
-		stopMoving();
+		getAnimation().stop();
 		getImageView().setViewport(layLeft);
 	}
 
 	public void layRight() {
-		stopMoving();
+		getAnimation().stop();
 		getImageView().setViewport(layRight);
 	}
 
 	public void standFront() {
-		stopMoving();
+		getAnimation().stop();
 		getImageView().setViewport(faceFront);
 	}
 
 	public void standLeft() {
-		stopMoving();
-		getImageView().setViewport(faceLeft);
+		getAnimation().setDuration(Duration.millis(ANIM_DURATION));
+		getAnimation().setOffsetY(STAND_LEFT_OFFSET_Y);
+		getAnimation().play();
 	}
 
 	public void standBack() {
-		stopMoving();
-		getImageView().setViewport(faceBack);
+		getAnimation().setDuration(Duration.millis(ANIM_DURATION/2));
+		getAnimation().setOffsetY(STAND_BACK_OFFSET_Y);
+		getAnimation().play();
 	}
 
 	public void standRight() {
-		stopMoving();
-		getImageView().setViewport(faceRight);
+		getAnimation().setDuration(Duration.millis(ANIM_DURATION));
+		getAnimation().setOffsetY(STAND_RIGHT_OFFSET_Y);
+		getAnimation().play();
 	}
 
 	@Override
 	public void walkDown() {
-		super.walkDown();
-		this.getAnimation().setOffsetY(FRONT_OFFSET_Y);
-		direction = KeyCode.DOWN;
+		getAnimation().setDuration(Duration.millis(ANIM_DURATION/2));
+		getAnimation().setOffsetY(FRONT_OFFSET_Y);
+		getAnimation().play();
+		setDirection(KeyCode.DOWN);
 	}
 
 	@Override
 	public void walkLeft() {
-		super.walkLeft();
-		this.getAnimation().setOffsetY(WALK_LEFT_OFFSET_Y);
-		direction = KeyCode.LEFT;
+		getAnimation().setDuration(Duration.millis(ANIM_DURATION));
+		getAnimation().setOffsetY(WALK_LEFT_OFFSET_Y);
+		getAnimation().play();
+		setDirection(KeyCode.LEFT);
 	}
 
 	@Override
 	public void walkUp() {
-		super.walkUp();
-		this.getAnimation().setOffsetY(BACK_OFFSET_Y);
-		direction = KeyCode.UP;
+		getAnimation().setDuration(Duration.millis(ANIM_DURATION/2));
+		getAnimation().setOffsetY(WALK_BACK_OFFSET_Y);
+		getAnimation().play();
+		setDirection(KeyCode.UP);
 	}
 
 	@Override
 	public void walkRight() {
-		super.walkRight();
-		this.getAnimation().setOffsetY(WALK_RIGHT_OFFSET_Y);
-		direction = KeyCode.RIGHT;
-	}
-
-	public KeyCode getDirection() {
-		return direction;
+		getAnimation().setDuration(Duration.millis(ANIM_DURATION));
+		getAnimation().setOffsetY(WALK_RIGHT_OFFSET_Y);
+		getAnimation().play();
+		setDirection(KeyCode.RIGHT);
 	}
 
 	public void eatItem(Sprite item) {
