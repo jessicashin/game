@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import fxgame.Game.GameState;
+import javafx.animation.FadeTransition;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -14,6 +15,7 @@ import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 public class ExitHomePane {
 
@@ -37,7 +39,7 @@ public class ExitHomePane {
 		sign.setPos(217, 183);
 		sprites.add(sign);
 
-		Text signText = new Text("THIS IS YOUR FINAL\nWARNING. BEWARE OF DOG");
+		Text signText = new Text("THIS IS YOUR FINAL\nWARNING. BEWARE OF DOG!!!");
 		signText.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/Papyrus.ttf"), 28));
 		InteractionBox readSign = new InteractionBox(
 			new Rectangle2D(227, 223, 20, 2), KeyCode.UP, signText
@@ -59,6 +61,11 @@ public class ExitHomePane {
 	}
 
 	public static Pane getPane() {
+		pane.setOpacity(0);
+		FadeTransition fadeTransition = new FadeTransition(Duration.millis(300), pane);
+		fadeTransition.setFromValue(0.0);
+		fadeTransition.setToValue(1.0);
+
 		if (Game.getCurrentState() == GameState.HOME) player.setYPos(-Controller.OFFSCREEN_Y);
 		else player.setXPos(-Controller.OFFSCREEN_X);
 
@@ -66,6 +73,8 @@ public class ExitHomePane {
 
 		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.EXIT_HOME);
+
+		fadeTransition.play();
 
 		return pane;
 	}

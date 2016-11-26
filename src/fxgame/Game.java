@@ -3,6 +3,7 @@ package fxgame;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class Game extends Application {
@@ -16,7 +17,7 @@ public class Game extends Application {
 	// Each of these is a pane representing one part of the world view
 	// (PART_ONE and LAB_EIGHT are scenes)
 	public static enum GameState {
-		TITLE, PART_ONE, LAB_EIGHT,
+		TITLE, INSTRUCTION, PART_ONE, LAB_EIGHT,
 		ROOM, HOME, EXIT_HOME, EXIT_HOME2, FORKED_PATH,
 		SKELETONS,
 		GAME_OVER
@@ -42,6 +43,7 @@ public class Game extends Application {
 		stage.setScene(TitleScene.getScene());
 
 		stage.setTitle("The Cooling - JavaFX Game");
+		stage.getScene().setFill(Color.BLACK);
 		stage.setResizable(false);
 		stage.show();
 

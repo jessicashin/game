@@ -13,6 +13,7 @@ import java.util.Random;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.geometry.Pos;
@@ -39,7 +40,7 @@ public class LabEight {
 	private static final Scene scene = new Scene(pane, Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 
 	private static final VBox gameOverPane = new VBox();
-	private static final Text restartText = new Text("[Press 2 or ENTER to restart]");
+	private static final Text restartText = new Text("[Press Z or ENTER to restart]");
 
 	private static final Brinn player = new Brinn();
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
@@ -249,6 +250,10 @@ public class LabEight {
 					initMonsterPos();
 					Game.setCurrentState(GameState.TITLE);
 					Game.getStage().setScene(TitleScene.getScene());
+					break;
+
+				case ESCAPE:
+					Platform.exit();
 
 				default: break;
 			}
@@ -405,9 +410,14 @@ public class LabEight {
 		// Let key press restart game after 3 seconds on the game over pane
 		Timeline delayRestart = new Timeline(new KeyFrame(Duration.seconds(3), event -> {
 			scene.setOnKeyPressed(e -> {
-				if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.DIGIT2) {
-					pane.getChildren().remove(gameOverPane);
-					restart();
+				switch(e.getCode()) {
+					case ENTER: case Z:
+						pane.getChildren().remove(gameOverPane);
+						restart();
+						break;
+					case ESCAPE:
+						Platform.exit();
+					default: break;
 				}
 			});
 		}));

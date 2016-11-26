@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 
 import fxgame.Game.GameState;
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Rectangle2D;
@@ -89,6 +90,11 @@ public class SkeletonsPane {
 	}
 
 	public static Pane getPane() {
+		pane.setOpacity(0);
+		FadeTransition fadeTransition = new FadeTransition(Duration.millis(300), pane);
+		fadeTransition.setFromValue(0.0);
+		fadeTransition.setToValue(1.0);
+
 		if (Game.getCurrentState() == GameState.FORKED_PATH)
 			player.setXPos(-Controller.OFFSCREEN_X);
 
@@ -98,6 +104,8 @@ public class SkeletonsPane {
 
 		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.SKELETONS);
+
+		fadeTransition.play();
 
 		return pane;
 	}

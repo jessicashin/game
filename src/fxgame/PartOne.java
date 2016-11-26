@@ -7,6 +7,7 @@ import java.util.Map;
 import fxgame.Game.GameState;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -92,6 +93,9 @@ public class PartOne {
 				stopMusic();
 				Game.setCurrentState(GameState.TITLE);
 				Game.getStage().setScene(TitleScene.getScene());
+			}
+			else if (event.getCode() == KeyCode.ESCAPE) {
+				Platform.exit();
 			}
 		});
 		music.play();
@@ -207,6 +211,7 @@ public class PartOne {
 
 	private static void startClickEventHandler() {
 		drawingPane.setOnMouseClicked(event -> {
+			drawingPane.requestFocus();
 			String sprite = spriteSelect.getValue();
 			String errorMessage = validateForm(spriteSelect.getValue(), scaleInput.getText());
 			// If validation fails, flash an error message

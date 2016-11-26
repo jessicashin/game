@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import fxgame.Game.GameState;
+import javafx.animation.FadeTransition;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.Pane;
+import javafx.util.Duration;
 
 public class ForkedPathPane {
 
@@ -37,7 +39,7 @@ public class ForkedPathPane {
 
 		InteractionBox readSign = new InteractionBox(
 			new Rectangle2D(520, 230, 20, 2), KeyCode.UP,
-			"Hint: Press X to fight enemies.\n\n"
+			"Remember! Press [C] to fight\nenemies."
 		);
 		interactions.add(readSign);
 
@@ -73,6 +75,11 @@ public class ForkedPathPane {
 	}
 
 	public static Pane getPane() {
+		pane.setOpacity(0);
+		FadeTransition fadeTransition = new FadeTransition(Duration.millis(300), pane);
+		fadeTransition.setFromValue(0.0);
+		fadeTransition.setToValue(1.0);
+
 		if (Game.getCurrentState() == GameState.EXIT_HOME2)
 			player.setYPos(-Controller.OFFSCREEN_Y);
 		else if (Game.getCurrentState() == GameState.SKELETONS)
@@ -81,6 +88,8 @@ public class ForkedPathPane {
 
 		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.FORKED_PATH);
+
+		fadeTransition.play();
 
 		return pane;
 	}

@@ -72,10 +72,8 @@ public class TitleScene {
 					break;
 
 				case ENTER: case Z:
-					TitleScene.stopMusic();
-					Game.setScene(new Scene(RoomPane.getPane(), Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT));
-					Game.getPlayerController().start();
-					Game.getStage().setScene(Game.getScene());
+					Game.setCurrentState(GameState.INSTRUCTION);
+					Game.getStage().setScene(InstructionScene.getScene());
 					break;
 
 				case ESCAPE:

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import fxgame.Game.GameState;
+import javafx.animation.FadeTransition;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -15,6 +16,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
 public class HomePane {
 
@@ -50,6 +52,11 @@ public class HomePane {
 	}
 
 	public static Pane getPane() {
+		pane.setOpacity(0);
+		FadeTransition fadeTransition = new FadeTransition(Duration.millis(300), pane);
+		fadeTransition.setFromValue(0.0);
+		fadeTransition.setToValue(1.0);
+
 		if (Game.getCurrentState() == GameState.ROOM)
 			player.setPos(272, 336); // igloo door
 		else player.setYPos(Game.WINDOW_HEIGHT - Controller.OFFSCREEN_Y);
@@ -60,6 +67,8 @@ public class HomePane {
 		Game.setCurrentState(GameState.HOME);
 
 		music.play();
+		fadeTransition.play();
+
 		return pane;
 	}
 

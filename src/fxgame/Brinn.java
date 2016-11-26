@@ -31,7 +31,7 @@ public class Brinn extends AnimatedSprite {
 
 	Brinn() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
-		this.setSpeed(150);
+		this.setSpeed(140);
 		this.setCBox(3, 34, 31, 23);
 	}
 

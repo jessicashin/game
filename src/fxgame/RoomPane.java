@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import fxgame.Game.GameState;
+import javafx.animation.FadeTransition;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -15,6 +16,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
 public class RoomPane {
 
@@ -86,11 +88,11 @@ public class RoomPane {
 		);
 
 		InteractionBox bookshelf = new InteractionBox(
-			new Rectangle2D(300, 166, 90, 1), KeyCode.UP,
+			new Rectangle2D(300, 166, 88, 1), KeyCode.UP,
 			"You have many books. They are\nwell worn and loved."
 		);
 		InteractionBox drawers = new InteractionBox(
-			new Rectangle2D(424, 158, 78, 1), KeyCode.UP,
+			new Rectangle2D(425, 158, 80, 1), KeyCode.UP,
 			"Your drawers are empty!"
 		);
 		interactions.add(bookshelf);
@@ -100,7 +102,12 @@ public class RoomPane {
 	}
 
 	public static Pane getPane() {
-		if (Game.getCurrentState() == GameState.TITLE || Game.getCurrentState() == GameState.GAME_OVER) {
+		pane.setOpacity(0);
+		FadeTransition fadeTransition = new FadeTransition(Duration.millis(300), pane);
+		fadeTransition.setFromValue(0.0);
+		fadeTransition.setToValue(1.0);
+
+		if (Game.getCurrentState() == GameState.INSTRUCTION || Game.getCurrentState() == GameState.GAME_OVER) {
 			player.setPos(Game.WINDOW_WIDTH/2 - player.getWidth()/2, Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
 			player.standFront();
 		}
@@ -117,6 +124,7 @@ public class RoomPane {
 		Game.setCurrentState(GameState.ROOM);
 
 		music.play();
+		fadeTransition.play();
 
 		return pane;
 	}

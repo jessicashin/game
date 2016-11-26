@@ -24,6 +24,7 @@ public class InteractionBox {
 	private Rectangle2D box;
 	private KeyCode direction;
 	private Pane modalPane = new StackPane();
+	private Insets modalPaneInsets = new Insets(26, 26, 26, 26);
 	private TypewriterAnimation typewriter;
 
 	// variables for messages with multiple Text objects
@@ -58,7 +59,7 @@ public class InteractionBox {
 		typewriter = new TypewriterAnimation(message, text);
 		modalPane.getChildren().add(text);
 		StackPane.setAlignment(text, Pos.TOP_CENTER);
-		StackPane.setMargin(text, new Insets(26, 26, 26, 26));
+		StackPane.setMargin(text, modalPaneInsets);
 	}
 
 	InteractionBox(Rectangle2D box, KeyCode direction, Text text) {
@@ -69,7 +70,7 @@ public class InteractionBox {
 		typewriter = new TypewriterAnimation(text.getText(), text);
 		modalPane.getChildren().add(text);
 		StackPane.setAlignment(text, Pos.TOP_CENTER);
-		StackPane.setMargin(text, new Insets(26, 26, 26, 26));
+		StackPane.setMargin(text, modalPaneInsets);
 	}
 
 	InteractionBox(Rectangle2D box, KeyCode direction, Text... texts) {
@@ -99,7 +100,7 @@ public class InteractionBox {
 
 		modalPane.getChildren().add(vbox);
 		StackPane.setAlignment(vbox, Pos.TOP_CENTER);
-		StackPane.setMargin(vbox, new Insets(26, 26, 26, 26));
+		StackPane.setMargin(vbox, modalPaneInsets);
 	}
 
 	public Rectangle2D getBox() {
