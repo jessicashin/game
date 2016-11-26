@@ -22,7 +22,7 @@ public class GameOverPane {
 
 	private static final VBox gameOverPane = new VBox();
 
-	private static final Text restartText = new Text("[Press 2 or ENTER to restart]");
+	private static final Text restartText = new Text("[Press Z or ENTER to restart]");
 
 	private static final AudioClip gameOverSoundEffect = new AudioClip(
 		LabEight.class.getResource("audio/gameover.wav").toString()
@@ -73,7 +73,7 @@ public class GameOverPane {
 		// Let key press restart game after 3 seconds on the game over pane
 		Timeline delayRestart = new Timeline(new KeyFrame(Duration.millis(3100), event -> {
 			Game.getScene().setOnKeyPressed(e -> {
-				if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.DIGIT2) {
+				if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.Z) {
 					gameOverMusic.stop();
 					if (Game.getCurrentState() == GameState.GAME_OVER)
 						Game.setPane(GameState.ROOM);

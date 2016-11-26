@@ -22,7 +22,7 @@ public class ExitHomePane {
 
 	private static final Brinn player = Game.getPlayer();
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
-	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
+	private static final List<AnimatedSprite> monsters = new ArrayList<AnimatedSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
 	private static final List<InteractionBox> interactions = new ArrayList<InteractionBox>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
@@ -37,9 +37,8 @@ public class ExitHomePane {
 		sign.setPos(217, 183);
 		sprites.add(sign);
 
-		Text signText = new Text("This is your final warning. BEWARE OF DOG\n");
-		signText.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/PapyrusUT.ttf"), 28));
-		signText.setLineSpacing(15);
+		Text signText = new Text("THIS IS YOUR FINAL\nWARNING. BEWARE OF DOG");
+		signText.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/Papyrus.ttf"), 28));
 		InteractionBox readSign = new InteractionBox(
 			new Rectangle2D(227, 223, 20, 2), KeyCode.UP, signText
 		);

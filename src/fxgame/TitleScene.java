@@ -37,7 +37,7 @@ public class TitleScene {
 		titleStack.getChildren().addAll(titleBack, titleFore);
 
 		// Create subtitle instructions
-		Text subtitle = new Text("[Press 2 or ENTER to begin]");
+		Text subtitle = new Text("[Press Z or ENTER to begin]");
 		subtitle.setFont(Font.loadFont(TitleScene.class.getResourceAsStream("fonts/DTM-Mono.otf"), 20));
 		subtitle.setFill(Color.LIGHTGRAY);
 
@@ -58,18 +58,20 @@ public class TitleScene {
 		titleMusic.play();
 
 		scene.setOnKeyPressed(e -> {
-			TitleScene.stopMusic();
 			switch (e.getCode()) {
 				case P:
+					TitleScene.stopMusic();
 					Game.setCurrentState(GameState.PART_ONE);
 					Game.getStage().setScene(PartOne.getScene());
 					break;
 				case L:
+					TitleScene.stopMusic();
 					Game.setCurrentState(GameState.LAB_EIGHT);
 					Game.getStage().setScene(LabEight.getScene());
 					break;
 
-				case ENTER: case DIGIT2:
+				case ENTER: case Z:
+					TitleScene.stopMusic();
 					Game.setScene(new Scene(RoomPane.getPane(), Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT));
 					Game.getPlayerController().start();
 					Game.getStage().setScene(Game.getScene());

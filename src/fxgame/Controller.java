@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.Set;
 
 import fxgame.Game.GameState;
+import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
@@ -15,7 +16,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.AudioClip;
 
 // This class controls the player movement (from key events),
 // the monster movements (random), and the dog movement (follows player).
@@ -31,25 +31,23 @@ public class Controller {
 	private static Luffy dog = Game.getDog();
 
 	private static List<Sprite> sprites;
-	private static List<AnimSprite> monsters;
+	private static List<AnimatedSprite> monsters;
 	private static List<Rectangle2D> obstacles;
 	private static List<InteractionBox> interactions;
 	private static Map<KeyCode, GameState> exits;
 
 	private static Pane currentModalPane = null;
-	private static final AudioClip textSoundEffect = new AudioClip(
-		Controller.class.getResource("audio/text.wav").toString()
-	);
 
 	private static AnimationTimer animationTimer;
 	private static final LongProperty lastUpdateTime = new SimpleLongProperty();
+	private static long startTimerTime;
 
 	// How far the player can travel outside the scene (to travel to another scene)
 	public static final int OFFSCREEN_X = 19;
 	public static final int OFFSCREEN_Y = 31;
 
 	Controller() {
-		textSoundEffect.setVolume(4);
+//		textSoundEffect.setVolume(4);
 		animationTimer = new AnimationTimer() {
 			@Override
 			public void handle(long timestamp) {
@@ -57,7 +55,8 @@ public class Controller {
 					double elapsedSeconds = (timestamp - lastUpdateTime.get()) / 1_000_000_000.0 ;
 					animatePlayer(elapsedSeconds);
 					animateMonsters(elapsedSeconds);
-					if (Game.getCurrentState() == GameState.ROOM)
+					double timeSinceStart = (timestamp - startTimerTime) / 1_000_000_000.0;
+					if (Game.getCurrentState() == GameState.ROOM && timeSinceStart > 1.6)
 						animateDog(elapsedSeconds);
 					reorderNodes();
 				}
@@ -68,12 +67,13 @@ public class Controller {
 
 	public void start() {
 		scene = Game.getScene();
+		startTimerTime = System.nanoTime();
 		animationTimer.start();
 		startKeyPressedEventHandler();
 		startKeyReleasedEventHandler();
 	}
 
-	public void setVals(List<Sprite> sprites, List<AnimSprite> monsters, List<Rectangle2D> obstacles,
+	public void setVals(List<Sprite> sprites, List<AnimatedSprite> monsters, List<Rectangle2D> obstacles,
 			List<InteractionBox> interactions, Map<KeyCode, GameState> exits) {
 		Controller.sprites = sprites;
 		Controller.monsters = monsters;
@@ -94,7 +94,8 @@ public class Controller {
 				case RIGHT:	player.walkRight(); break;
 				case DOWN:	player.walkDown(); break;
 				case LEFT:	player.walkLeft(); break;
-				case Z:		checkIfInteracting(); break;
+
+				case Z: case ENTER:	checkIfInteracting(); break;
 				default: break;
 			}
 
@@ -193,7 +194,7 @@ public class Controller {
 
 	// Animate the monsters movement based on their randomly set velocities
 	private static void animateMonsters(double elapsedSeconds) {
-		for (AnimSprite monster : monsters) {
+		for (AnimatedSprite monster : monsters) {
 			double deltaX = elapsedSeconds * monster.getXVelocity();
 			double deltaY = elapsedSeconds * monster.getYVelocity();
 			double oldX = monster.getXPos();
@@ -214,7 +215,7 @@ public class Controller {
 	}
 
 	// Change direction if obstacle collision
-	private static void fixMonsterDirection(AnimSprite monster) {
+	private static void fixMonsterDirection(AnimatedSprite monster) {
 		int randomDirection = RANDOM.nextInt(3);
 		if (monster.isFacingRight()) {
 			switch(randomDirection) {
@@ -250,8 +251,7 @@ public class Controller {
 	private static void checkIfInteracting() {
 		for (InteractionBox box : interactions) {
 			if (player.getCBox().intersects(box.getBox()) && player.getDirection() == box.getDirection()) {
-				Game.addModalPane(box.getModalPane());
-				textSoundEffect.play();
+				Game.addModalPane(box.getModalPaneAndPlay());
 				currentModalPane = box.getModalPane();
 				switch(player.getDirection()) {
 					case UP:	player.standBack(); break;
@@ -261,14 +261,22 @@ public class Controller {
 					default: break;
 				}
 				scene.setOnKeyReleased(e -> {});
+				scene.setOnKeyPressed(e -> {}); //TODO: Press X to skip text
 				scene.setOnKeyPressed(e -> {
-					if (e.getCode() == KeyCode.Z) {
-						Game.removeModalPane(box.getModalPane());
-						textSoundEffect.play();
-						currentModalPane = null;
-						keysPressed.clear();
-						startKeyPressedEventHandler();
-						startKeyReleasedEventHandler();
+					if ((e.getCode() == KeyCode.Z || e.getCode() == KeyCode.ENTER)) {
+						boolean animationsFinished = true;
+						for (TypewriterAnimation text : box.getTextAnimations()) {
+							if (text.getStatus() == Animation.Status.RUNNING) {
+								animationsFinished = false;
+							}
+						}
+						if (animationsFinished) {
+							Game.removeModalPane(box.getModalPane());
+							currentModalPane = null;
+							keysPressed.clear();
+							startKeyPressedEventHandler();
+							startKeyReleasedEventHandler();
+						}
 					}
 				});
 			}

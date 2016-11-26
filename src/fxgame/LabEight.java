@@ -44,7 +44,7 @@ public class LabEight {
 	private static final Brinn player = new Brinn();
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
-	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
+	private static final List<AnimatedSprite> monsters = new ArrayList<AnimatedSprite>();
 
 	private static AnimationTimer animationTimer;
 	private static final LongProperty lastUpdateTime = new SimpleLongProperty();
@@ -158,7 +158,7 @@ public class LabEight {
 	// Set initial positions on the pane for each monster
 	private static void initMonsterPos() {
 		int i = 1;
-		for (AnimSprite monster : monsters) {
+		for (AnimatedSprite monster : monsters) {
 			monster.standFront();
 			switch (i)
 			{
@@ -190,7 +190,7 @@ public class LabEight {
 
 	// Animate the monsters movement based on their randomly set velocities
 	private static void animateMonsters(double elapsedSeconds) {
-		for (AnimSprite monster : monsters) {
+		for (AnimatedSprite monster : monsters) {
 			double deltaX = elapsedSeconds * monster.getXVelocity();
 			double deltaY = elapsedSeconds * monster.getYVelocity();
 			double oldX = monster.getXPos();
@@ -211,7 +211,7 @@ public class LabEight {
 		monstersTimeline = new Timeline(
 				new KeyFrame(
 						Duration.ZERO, e -> {
-							for (AnimSprite monster : monsters) {
+							for (AnimatedSprite monster : monsters) {
 								int randomDirection = RANDOM.nextInt(4);
 								switch(randomDirection) {
 									case 0: monster.walkDown(); break;
@@ -288,7 +288,7 @@ public class LabEight {
 	}
 
 	// Change direction if obstacle collision
-	private static void fixMonsterDirection(AnimSprite monster, double desiredX, double desiredY) {
+	private static void fixMonsterDirection(AnimatedSprite monster, double desiredX, double desiredY) {
 		int randomDirection = RANDOM.nextInt(3);
 		if (monster.getXPos() < desiredX) {
 			switch(randomDirection) {

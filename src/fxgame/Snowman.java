@@ -2,7 +2,7 @@ package fxgame;
 
 import javafx.geometry.Rectangle2D;
 
-public class Snowman extends AnimSprite {
+public class Snowman extends AnimatedSprite {
 
 	private static final String IMAGE_PATH = "fxgame/images/snowman.png";
 

@@ -29,7 +29,7 @@ public class RoomPane {
 	private static final Luffy dog = Game.getDog();
 
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
-	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
+	private static final List<AnimatedSprite> monsters = new ArrayList<AnimatedSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
 	private static final List<InteractionBox> interactions = new ArrayList<InteractionBox>();
@@ -87,11 +87,11 @@ public class RoomPane {
 
 		InteractionBox bookshelf = new InteractionBox(
 			new Rectangle2D(300, 166, 90, 1), KeyCode.UP,
-			"You have many books. They are well worn and loved.\n"
+			"You have many books. They are\nwell worn and loved."
 		);
 		InteractionBox drawers = new InteractionBox(
 			new Rectangle2D(424, 158, 78, 1), KeyCode.UP,
-			"Your drawers are empty!\n\n"
+			"Your drawers are empty!"
 		);
 		interactions.add(bookshelf);
 		interactions.add(drawers);

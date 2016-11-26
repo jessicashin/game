@@ -2,7 +2,7 @@ package fxgame;
 
 import javafx.geometry.Rectangle2D;
 
-public class Skeleton extends AnimSprite {
+public class Skeleton extends AnimatedSprite {
 
 	private static final String IMAGE_PATH = "fxgame/images/skeleton.png";
 

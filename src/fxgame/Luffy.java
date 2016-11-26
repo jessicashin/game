@@ -4,7 +4,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
 
-public class Luffy extends AnimSprite {
+public class Luffy extends AnimatedSprite {
 
 	private static final String IMAGE_PATH = "fxgame/images/dog.png";
 

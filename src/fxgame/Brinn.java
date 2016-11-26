@@ -5,7 +5,7 @@ import java.util.List;
 
 import javafx.geometry.Rectangle2D;
 
-public class Brinn extends AnimSprite {
+public class Brinn extends AnimatedSprite {
 
 	private static final String IMAGE_PATH = "fxgame/images/girl.png";
 

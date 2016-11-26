@@ -23,7 +23,7 @@ public class ExitHome2Pane {
 
 	private static final Brinn player = Game.getPlayer();
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
-	private static final List<AnimSprite> monsters = new ArrayList<AnimSprite>();
+	private static final List<AnimatedSprite> monsters = new ArrayList<AnimatedSprite>();
 	private static final List<Rectangle2D> obstacles = new ArrayList<Rectangle2D>();
 	private static final List<InteractionBox> interactions = new ArrayList<InteractionBox>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
@@ -38,10 +38,10 @@ public class ExitHome2Pane {
 		sign.setPos(378, 174);
 		sprites.add(sign);
 
-		Text signText = new Text("Turn back South. Danger past this point...\n");
-		signText.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/PapyrusUT.ttf"), 26));
-		signText.setLineSpacing(15);
-		Text signComment = new Text("\n\n(What an intimidating sign!)");
+		Text signText = new Text("TURN BACK SOUTH. DANGER PAST\nTHIS POINT...");
+		signText.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/Papyrus.ttf"), 26));
+		signText.setLineSpacing(8);
+		Text signComment = new Text("(Hehe, what an intimidating sign!)");
 		signComment.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/DTM-Mono.otf"), 24));
 		signComment.setLineSpacing(10);
 		InteractionBox readSign = new InteractionBox(

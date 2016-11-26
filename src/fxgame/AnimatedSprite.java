@@ -5,12 +5,12 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
 
-public abstract class AnimSprite extends Sprite {
+public abstract class AnimatedSprite extends Sprite {
 
 	private SpriteAnimation animation;
 	private KeyCode direction = KeyCode.DOWN;
 
-	AnimSprite(String imagePath, int width, int height, int count, int columns, int animDuration) {
+	AnimatedSprite(String imagePath, int width, int height, int count, int columns, int animDuration) {
 		this(imagePath, width, height);
 		animation = new SpriteAnimation(
 				getImageView(), Duration.millis(animDuration),
@@ -19,7 +19,7 @@ public abstract class AnimSprite extends Sprite {
 		animation.setCycleCount(Animation.INDEFINITE);
 	}
 
-	AnimSprite(String imagePath, int width, int height) {
+	AnimatedSprite(String imagePath, int width, int height) {
 		super(imagePath, width, height);
 		getImageView().setViewport(new Rectangle2D(0, 0, width, height));
 	}
