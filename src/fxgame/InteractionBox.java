@@ -1,8 +1,5 @@
 package fxgame;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
@@ -23,7 +20,8 @@ public class InteractionBox {
 	private Rectangle2D box;
 	private KeyCode direction;
 	private Pane modalPane = new StackPane();
-	private List<TypewriterAnimation> typewriters = new ArrayList<TypewriterAnimation>();
+	private TypewriterAnimation typewriter = null;
+	private boolean animationFinished = false;
 	private Timeline typewriterTimeline = null;
 	private Text[] texts = null;
 
@@ -49,7 +47,7 @@ public class InteractionBox {
 		text.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/DTM-Mono.otf"), 26));
 		text.setWrappingWidth(500);
 		text.setLineSpacing(6);
-		typewriters.add(new TypewriterAnimation(message, text));
+		typewriter = new TypewriterAnimation(message, text);
 		modalPane.getChildren().add(text);
 		StackPane.setAlignment(text, Pos.TOP_CENTER);
 		StackPane.setMargin(text, new Insets(26, 26, 26, 26));
@@ -60,7 +58,7 @@ public class InteractionBox {
 		text.setFill(Color.WHITE);
 		text.setWrappingWidth(500);
 		text.setLineSpacing(6);
-		typewriters.add(new TypewriterAnimation(text.getText(), text));
+		typewriter = new TypewriterAnimation(text.getText(), text);
 		modalPane.getChildren().add(text);
 		StackPane.setAlignment(text, Pos.TOP_CENTER);
 		StackPane.setMargin(text, new Insets(26, 26, 26, 26));
@@ -72,6 +70,7 @@ public class InteractionBox {
 		vbox.setSpacing(10);
 		this.texts = texts;
 		typewriterTimeline = new Timeline();
+		double duration = 0;
 
 		for (int i = 0; i < texts.length; i++) {
 			texts[i].setFill(Color.WHITE);
@@ -79,9 +78,13 @@ public class InteractionBox {
 			vbox.getChildren().add(texts[i]);
 
 			TypewriterAnimation animation = new TypewriterAnimation(texts[i].getText(), texts[i]);
-			typewriters.add(animation);
-			typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(2200*i), e -> animation.play()));
+			typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration), e -> animation.play()));
+			duration += animation.getCycleDuration().toMillis() + 800;
+			typewriterTimeline.setOnFinished(e -> animationFinished = true);
 			texts[i].setText("");
+			if (i == texts.length-1) {
+				typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration - 800)));
+			}
 		}
 
 		modalPane.getChildren().add(vbox);
@@ -97,15 +100,20 @@ public class InteractionBox {
 		return direction;
 	}
 
-	public List<TypewriterAnimation> getTextAnimations() {
-		return typewriters;
+	public TypewriterAnimation getTextAnimation() {
+		return typewriter;
+	}
+
+	public boolean isTextAnimationFinished() {
+		return animationFinished;
 	}
 
 	public Pane getModalPaneAndPlay() {
-		if (typewriterTimeline == null) {
-			typewriters.get(0).play();
+		if (typewriter != null) {
+			typewriter.play();
 		}
-		else {
+		else if (typewriterTimeline != null){
+			animationFinished = false;
 			for (Text text : texts) {
 				text.setText("");
 			}

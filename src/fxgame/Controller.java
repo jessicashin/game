@@ -264,11 +264,11 @@ public class Controller {
 				scene.setOnKeyPressed(e -> {}); //TODO: Press X to skip text
 				scene.setOnKeyPressed(e -> {
 					if ((e.getCode() == KeyCode.Z || e.getCode() == KeyCode.ENTER)) {
-						boolean animationsFinished = true;
-						for (TypewriterAnimation text : box.getTextAnimations()) {
-							if (text.getStatus() == Animation.Status.RUNNING) {
-								animationsFinished = false;
-							}
+						boolean animationsFinished = false;
+						if ((box.getTextAnimation() != null &&
+							box.getTextAnimation().getStatus() == Animation.Status.STOPPED) ||
+							box.isTextAnimationFinished()) {
+							animationsFinished = true;
 						}
 						if (animationsFinished) {
 							Game.removeModalPane(box.getModalPane());
