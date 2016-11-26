@@ -1,6 +1,7 @@
 package fxgame;
 
 import fxgame.Game.GameState;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -75,6 +76,11 @@ public class TitleScene {
 					Game.setScene(new Scene(RoomPane.getPane(), Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT));
 					Game.getPlayerController().start();
 					Game.getStage().setScene(Game.getScene());
+					break;
+
+				case ESCAPE:
+					Platform.exit();
+
 				default: break;
 			}
 		});

@@ -1,5 +1,6 @@
 package fxgame;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
@@ -15,15 +16,22 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+// This class handles the collision box and modal message display
+// for any sprite interactions
+
 public class InteractionBox {
 
 	private Rectangle2D box;
 	private KeyCode direction;
 	private Pane modalPane = new StackPane();
-	private TypewriterAnimation typewriter = null;
+	private TypewriterAnimation typewriter;
+
+	// variables for messages with multiple Text objects
 	private boolean animationFinished = false;
-	private Timeline typewriterTimeline = null;
-	private Text[] texts = null;
+	private Timeline typewriterTimeline;
+	private TypewriterAnimation[] animations;
+	private Text[] texts;
+	private String[] fullTexts;
 
 	InteractionBox(Rectangle2D box, KeyCode direction) {
 		this.box = box;
@@ -69,23 +77,25 @@ public class InteractionBox {
 		VBox vbox = new VBox();
 		vbox.setSpacing(10);
 		this.texts = texts;
+		fullTexts = new String[texts.length];
+		animations = new TypewriterAnimation[texts.length];
 		typewriterTimeline = new Timeline();
 		double duration = 0;
-
 		for (int i = 0; i < texts.length; i++) {
+			fullTexts[i] = texts[i].getText();
 			texts[i].setFill(Color.WHITE);
 			texts[i].setWrappingWidth(500);
 			vbox.getChildren().add(texts[i]);
-
 			TypewriterAnimation animation = new TypewriterAnimation(texts[i].getText(), texts[i]);
+			animations[i] = animation;
 			typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration), e -> animation.play()));
 			duration += animation.getCycleDuration().toMillis() + 800;
-			typewriterTimeline.setOnFinished(e -> animationFinished = true);
 			texts[i].setText("");
 			if (i == texts.length-1) {
 				typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration - 800)));
 			}
 		}
+		typewriterTimeline.setOnFinished(e -> animationFinished = true);
 
 		modalPane.getChildren().add(vbox);
 		StackPane.setAlignment(vbox, Pos.TOP_CENTER);
@@ -104,8 +114,29 @@ public class InteractionBox {
 		return typewriter;
 	}
 
-	public boolean isTextAnimationFinished() {
+	public boolean isTextTimelineFinished() {
 		return animationFinished;
+	}
+
+	public void fastForwardText() {
+		if (typewriter != null) {
+			if (typewriter.getStatus() == Animation.Status.RUNNING) {
+				typewriter.jumpTo("end");
+				typewriter.stop();
+			}
+		}
+		else if (typewriterTimeline != null) {
+			if (typewriterTimeline.getStatus() == Animation.Status.RUNNING) {
+				animationFinished = true;
+				typewriterTimeline.stop();
+				for (TypewriterAnimation ta : animations) {
+					ta.stop();
+				}
+				for (int i = 0; i < texts.length; i++) {
+					texts[i].setText(fullTexts[i]);
+				}
+			}
+		}
 	}
 
 	public Pane getModalPaneAndPlay() {

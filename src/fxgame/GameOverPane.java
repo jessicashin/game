@@ -3,6 +3,7 @@ package fxgame;
 import fxgame.Game.GameState;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
@@ -78,6 +79,9 @@ public class GameOverPane {
 					if (Game.getCurrentState() == GameState.GAME_OVER)
 						Game.setPane(GameState.ROOM);
 					Game.getPlayerController().start();
+				}
+				else if (e.getCode() == KeyCode.ESCAPE) {
+					Platform.exit();
 				}
 			});
 		}));

@@ -10,6 +10,7 @@ import java.util.Set;
 import fxgame.Game.GameState;
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.geometry.Rectangle2D;
@@ -47,7 +48,6 @@ public class Controller {
 	public static final int OFFSCREEN_Y = 31;
 
 	Controller() {
-//		textSoundEffect.setVolume(4);
 		animationTimer = new AnimationTimer() {
 			@Override
 			public void handle(long timestamp) {
@@ -96,6 +96,8 @@ public class Controller {
 				case LEFT:	player.walkLeft(); break;
 
 				case Z: case ENTER:	checkIfInteracting(); break;
+
+				case ESCAPE: Platform.exit();
 				default: break;
 			}
 
@@ -260,14 +262,14 @@ public class Controller {
 					case LEFT:	player.standLeft(); break;
 					default: break;
 				}
+				// Disable key events for player movement in modal view
 				scene.setOnKeyReleased(e -> {});
-				scene.setOnKeyPressed(e -> {}); //TODO: Press X to skip text
 				scene.setOnKeyPressed(e -> {
+					boolean animationsFinished = false;
 					if ((e.getCode() == KeyCode.Z || e.getCode() == KeyCode.ENTER)) {
-						boolean animationsFinished = false;
 						if ((box.getTextAnimation() != null &&
 							box.getTextAnimation().getStatus() == Animation.Status.STOPPED) ||
-							box.isTextAnimationFinished()) {
+							box.isTextTimelineFinished()) {
 							animationsFinished = true;
 						}
 						if (animationsFinished) {
@@ -277,6 +279,13 @@ public class Controller {
 							startKeyPressedEventHandler();
 							startKeyReleasedEventHandler();
 						}
+					}
+					else if (e.getCode() == KeyCode.X || e.getCode() == KeyCode.SHIFT) {
+						box.fastForwardText();
+					}
+
+					else if (e.getCode() == KeyCode.ESCAPE) {
+						Platform.exit();
 					}
 				});
 			}
