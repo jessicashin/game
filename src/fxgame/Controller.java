@@ -53,7 +53,7 @@ public class Controller {
 	private static boolean keyPressHasAttacked = false;
 	private static boolean isPunching = false;
 	private static Timeline punchTimeline = new Timeline(
-		new KeyFrame(Duration.millis(150), e -> {
+		new KeyFrame(Duration.millis(120), e -> {
 			for (ImageView image : playerPunch.getAllImages()) {
 				pane.getChildren().remove(image);
 			}
@@ -65,7 +65,7 @@ public class Controller {
 				default: break;
 			}
 		}),
-		new KeyFrame(Duration.millis(200), e -> isPunching = false)
+		new KeyFrame(Duration.millis(180), e -> isPunching = false)
 	);
 
 	private static final AudioClip wooshSound = new AudioClip(
