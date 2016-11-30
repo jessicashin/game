@@ -123,7 +123,7 @@ public class RoomPane {
 			dog.setPos(423, 320);
 			dog.layLeft();
 
-			Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
+			Game.getPlayerController().setVals(pane, sprites, monsters, obstacles, interactions, exits);
 			Game.setCurrentState(GameState.ROOM);
 
 			music.play();

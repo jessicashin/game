@@ -28,6 +28,7 @@ public class Game extends Application {
 	// These are static across the whole game
 	// The pane classes refer to these instances
 	private static final Brinn player = new Brinn();
+	private static final Punch playerPunch = new Punch();
 	private static final Luffy dog = new Luffy();
 	private static final Controller controller = new Controller();
 
@@ -114,6 +115,10 @@ public class Game extends Application {
 
 	public static Stage getStage() {
 		return stage;
+	}
+
+	public static Punch getPlayerPunch() {
+		return playerPunch;
 	}
 
 }

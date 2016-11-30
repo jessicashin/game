@@ -10,13 +10,18 @@ import java.util.Set;
 import fxgame.Game.GameState;
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.AudioClip;
+import javafx.util.Duration;
 
 // This class controls the player movement (from key events),
 // the monster movements (random), and the dog movement (follows player).
@@ -28,7 +33,9 @@ public class Controller {
 	private static final Random RANDOM = new Random();
 
 	private static Scene scene;
+	private static Pane pane;
 	private static Brinn player = Game.getPlayer();
+	private static Punch playerPunch = new Punch();
 	private static Luffy dog = Game.getDog();
 
 	private static List<Sprite> sprites;
@@ -43,6 +50,31 @@ public class Controller {
 	private static final LongProperty lastUpdateTime = new SimpleLongProperty();
 	private static long startTimerTime;
 
+	private static boolean keyPressHasAttacked = false;
+	private static boolean isPunching = false;
+	private static Timeline punchTimeline = new Timeline(
+		new KeyFrame(Duration.millis(150), e -> {
+			for (ImageView image : playerPunch.getAllImages()) {
+				pane.getChildren().remove(image);
+			}
+			switch(player.getDirection()) {
+				case UP:	player.setToBackViewport(); break;
+				case RIGHT:	player.setToRightViewport(); break;
+				case DOWN:	player.setToFrontViewport(); break;
+				case LEFT:	player.setToLeftViewport(); break;
+				default: break;
+			}
+		}),
+		new KeyFrame(Duration.millis(200), e -> isPunching = false)
+	);
+
+	private static final AudioClip wooshSound = new AudioClip(
+		Controller.class.getResource("audio/woosh.wav").toString()
+	);
+	private static final AudioClip bashSound = new AudioClip(
+		Controller.class.getResource("audio/bash.wav").toString()
+	);
+
 	// How far the player can travel outside the scene (to travel to another scene)
 	public static final int OFFSCREEN_X = 19;
 	public static final int OFFSCREEN_Y = 31;
@@ -54,6 +86,8 @@ public class Controller {
 				if (lastUpdateTime.get() > 0) {
 					double elapsedSeconds = (timestamp - lastUpdateTime.get()) / 1_000_000_000.0 ;
 					animatePlayer(elapsedSeconds);
+					if (isPunching)
+						animatePlayerPunch();
 					animateMonsters(elapsedSeconds);
 					double timeSinceStart = (timestamp - startTimerTime) / 1_000_000_000.0;
 					if (Game.getCurrentState() == GameState.ROOM && timeSinceStart > 1.6)
@@ -74,8 +108,9 @@ public class Controller {
 		startKeyReleasedEventHandler();
 	}
 
-	public void setVals(List<Sprite> sprites, List<AnimatedSprite> monsters, List<Rectangle2D> obstacles,
-			List<InteractionBox> interactions, Map<KeyCode, GameState> exits) {
+	public void setVals(Pane pane, List<Sprite> sprites, List<AnimatedSprite> monsters,
+			List<Rectangle2D> obstacles, List<InteractionBox> interactions, Map<KeyCode, GameState> exits) {
+		Controller.pane = pane;
 		Controller.sprites = sprites;
 		Controller.monsters = monsters;
 		Controller.obstacles = obstacles;
@@ -91,20 +126,25 @@ public class Controller {
 			KeyCode key = e.getCode();
 
 			switch(key) {
-				case UP:	player.walkUp(); break;
-				case RIGHT:	player.walkRight(); break;
-				case DOWN:	player.walkDown(); break;
-				case LEFT:	player.walkLeft(); break;
+				case UP:	player.walkUp(); keysPressed.add(key); break;
+				case RIGHT:	player.walkRight(); keysPressed.add(key); break;
+				case DOWN:	player.walkDown(); keysPressed.add(key); break;
+				case LEFT:	player.walkLeft(); keysPressed.add(key); break;
 
 				case Z: case ENTER:	checkIfInteracting(); break;
 
-				case C: case SHIFT: break;
+				case C: case SPACE:
+					if (Game.getCurrentState() != GameState.ROOM &&
+						!isPunching && !keyPressHasAttacked) {
+						keyPressHasAttacked = true;
+						isPunching = true;
+						playerPunch();
+					}
+					break;
 
 				case ESCAPE: Platform.exit();
 				default: break;
 			}
-
-			keysPressed.add(key);
 		});
 	}
 
@@ -112,6 +152,11 @@ public class Controller {
 	private static void startKeyReleasedEventHandler() {
 		scene.setOnKeyReleased(e -> {
 			KeyCode key = e.getCode();
+
+			if (key == KeyCode.SPACE || key == KeyCode.C) {
+				keyPressHasAttacked = false;
+			}
+
 			keysPressed.remove(key);
 
 			if (keysPressed.size() == 1) {
@@ -155,8 +200,36 @@ public class Controller {
 			Game.setPane(newScene);
 		}
 
-		// Check if the player has collided with a monster
+		// Check if the player has attacked a monster
+		if (isPunching) {
+			checkIfPunchedMonster();
+		}
+
+		// Check if the player has collided with a monster (without attacking)
 		checkForMonsterCollision(newX, newY);
+	}
+
+	private static void playerPunch() {
+		switch(player.getDirection()) {
+			case UP:	player.punchUp(); playerPunch.punchUp(); break;
+			case RIGHT:	player.punchRight(); playerPunch.punchRight(); break;
+			case DOWN:	player.punchDown(); playerPunch.punchDown(); break;
+			case LEFT:	player.punchLeft(); playerPunch.punchLeft(); break;
+			default: break;
+		}
+		wooshSound.play();
+		pane.getChildren().add(playerPunch.getImageView());
+		punchTimeline.play();
+	}
+
+	// Animate the player's punch attack to the player's position
+	private static void animatePlayerPunch() {
+		switch(player.getDirection()) {
+		case UP: playerPunch.punchUp(); break;
+		case RIGHT: playerPunch.punchRight(); break;
+		case DOWN: playerPunch.punchDown(); break;
+		case LEFT: playerPunch.punchLeft(); break;
+		default: break; }
 	}
 
 	// Animate the dog to follow the player around their room
@@ -197,24 +270,57 @@ public class Controller {
 			dog.setPos(newX, newY);
 	}
 
+	private static void setDogInteractionBox() {
+		dog.getInteractionBox().setDirection(player.getDirection());
+		switch(player.getDirection()) {
+			case UP:
+				dog.getInteractionBox().setBox(
+					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX(),
+						dog.getYPos() + dog.getCBoxOffsetY() + dog.getCBoxHeight(), dog.getCBoxWidth(), 4)
+				);
+				break;
+			case RIGHT:
+				dog.getInteractionBox().setBox(
+					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX() - 4,
+						dog.getYPos() + dog.getCBoxOffsetY(), 4, dog.getCBoxHeight())
+				);
+				break;
+			case DOWN:
+				dog.getInteractionBox().setBox(
+					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX(),
+						dog.getYPos() + dog.getCBoxOffsetY() - 4, dog.getCBoxWidth(), 4)
+				);
+				break;
+			case LEFT:
+				dog.getInteractionBox().setBox(
+					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX() + dog.getCBoxWidth(),
+						dog.getYPos() + dog.getCBoxOffsetY(), 4, dog.getCBoxHeight())
+				);
+				break;
+			default: break;
+		}
+	}
+
 	// Animate the monsters movement based on their randomly set velocities
 	private static void animateMonsters(double elapsedSeconds) {
 		for (AnimatedSprite monster : monsters) {
-			double deltaX = elapsedSeconds * monster.getXVelocity();
-			double deltaY = elapsedSeconds * monster.getYVelocity();
-			double oldX = monster.getXPos();
-			double newX = Math.max(
-				0, Math.min(Game.WINDOW_WIDTH - player.getWidth() - monster.getWidth(), oldX + deltaX)
-			);
-			double oldY = monster.getYPos();
-			double newY = Math.max(
-				0, Math.min(Game.WINDOW_HEIGHT - player.getHeight() - monster.getHeight(), oldY + deltaY)
-			);
-			if (!checkForObstacleCollision(monster, newX, newY)) {
-				monster.setPos(newX, newY);
-			}
-			if (monster.getXPos() != oldX + deltaX || monster.getYPos() != oldY + deltaY) {
-				fixMonsterDirection(monster);
+			if (pane.getChildren().contains(monster.getImageView())) {
+				double deltaX = elapsedSeconds * monster.getXVelocity();
+				double deltaY = elapsedSeconds * monster.getYVelocity();
+				double oldX = monster.getXPos();
+				double newX = Math.max(
+					0, Math.min(Game.WINDOW_WIDTH - player.getWidth() - monster.getWidth(), oldX + deltaX)
+				);
+				double oldY = monster.getYPos();
+				double newY = Math.max(
+					0, Math.min(Game.WINDOW_HEIGHT - player.getHeight() - monster.getHeight(), oldY + deltaY)
+				);
+				if (!checkForObstacleCollision(monster, newX, newY)) {
+					monster.setPos(newX, newY);
+				}
+				if (monster.getXPos() != oldX + deltaX || monster.getYPos() != oldY + deltaY) {
+					fixMonsterDirection(monster);
+				}
 			}
 		}
 	}
@@ -252,41 +358,19 @@ public class Controller {
 		}
 	}
 
-	private static void setDogInteractionBox() {
-		dog.getInteractionBox().setDirection(player.getDirection());
-		switch(player.getDirection()) {
-			case UP:
-				dog.getInteractionBox().setBox(
-					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX(),
-						dog.getYPos() + dog.getCBoxOffsetY() + dog.getCBoxHeight(), dog.getCBoxWidth(), 4)
-				);
-				break;
-			case RIGHT:
-				dog.getInteractionBox().setBox(
-					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX() - 4,
-						dog.getYPos() + dog.getCBoxOffsetY(), 4, dog.getCBoxHeight())
-				);
-				break;
-			case DOWN:
-				dog.getInteractionBox().setBox(
-					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX(),
-						dog.getYPos() + dog.getCBoxOffsetY() - 4, dog.getCBoxWidth(), 4)
-				);
-				break;
-			case LEFT:
-				dog.getInteractionBox().setBox(
-					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX() + dog.getCBoxWidth(),
-						dog.getYPos() + dog.getCBoxOffsetY(), 4, dog.getCBoxHeight())
-				);
-				break;
-			default: break;
-		}
-	}
-
 	// Check if player is facing something that can be interacted with
 	private static void checkIfInteracting() {
 		for (InteractionBox box : interactions) {
 			if (player.getCBox().intersects(box.getBox()) && player.getDirection() == box.getDirection()) {
+				if (box == dog.getInteractionBox()) {
+					switch(player.getDirection()) {
+						case UP:	dog.setDirection(KeyCode.DOWN); break;
+						case RIGHT:	dog.setDirection(KeyCode.LEFT); break;
+						case DOWN:	dog.setDirection(KeyCode.UP); break;
+						case LEFT:	dog.setDirection(KeyCode.RIGHT); break;
+						default: break;
+					}
+				}
 				Game.addModalPane(box.getModalPaneAndPlay());
 				currentModalPane = box.getModalPane();
 				switch(player.getDirection()) {
@@ -353,7 +437,7 @@ public class Controller {
 	// Check for collisions with obstacles
 	private static boolean checkForObstacleCollision(Sprite sprite, double newX, double newY) {
 		for (Sprite s : sprites) {
-			if (s != sprite) {
+			if (s != sprite && s != player) {
 				if (s.getCBox().intersects(sprite.getNewCBox(newX, newY))) {
 					return true;
 				}
@@ -372,10 +456,23 @@ public class Controller {
 		return false;
 	}
 
+	// Check if player has punched a monster
+	private static void checkIfPunchedMonster() {
+		for (Sprite monster : monsters) {
+			if (monster.getBounds().intersects(playerPunch.getCBox())) {
+				bashSound.play();
+				pane.getChildren().remove(monster.getImageView());
+				monster.setPos(0, -200);
+			}
+		}
+	}
+
 	// Check if player has collided with a monster and if so call game over
 	private static void checkForMonsterCollision(double newX, double newY) {
 		for (Sprite monster : monsters) {
 			if (monster.getCBox().intersects(player.getNewCBox(newX, newY))) {
+				scene.setOnKeyPressed(empty -> {});
+				player.setPos(-100, -100);
 				Game.setPane(GameState.GAME_OVER);
 				break;
 			}

@@ -41,9 +41,23 @@ public class Brinn extends AnimatedSprite {
 	}
 
 
+	public void setToFrontViewport() {
+		getImageView().setViewport(new Rectangle2D(0, FRONT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT));
+		if (getXVelocity() != 0 || getYVelocity() != 0) {
+			getAnimation().play();
+		}
+	}
+
 	public void standFront() {
 		stopMoving();
 		getImageView().setViewport(new Rectangle2D(0, FRONT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT));
+	}
+
+	public void setToLeftViewport() {
+		getImageView().setViewport(new Rectangle2D(0, LEFT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT));
+		if (getXVelocity() != 0 || getYVelocity() != 0) {
+			getAnimation().play();
+		}
 	}
 
 	public void standLeft() {
@@ -51,9 +65,23 @@ public class Brinn extends AnimatedSprite {
 		getImageView().setViewport(new Rectangle2D(0, LEFT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT));
 	}
 
+	public void setToBackViewport() {
+		getImageView().setViewport(new Rectangle2D(0, BACK_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT));
+		if (getXVelocity() != 0 || getYVelocity() != 0) {
+			getAnimation().play();
+		}
+	}
+
 	public void standBack() {
 		stopMoving();
 		getImageView().setViewport(new Rectangle2D(0, BACK_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT));
+	}
+
+	public void setToRightViewport() {
+		getImageView().setViewport(new Rectangle2D(0, RIGHT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT));
+		if (getXVelocity() != 0 || getYVelocity() != 0) {
+			getAnimation().play();
+		}
 	}
 
 	public void standRight() {
@@ -86,22 +114,22 @@ public class Brinn extends AnimatedSprite {
 	}
 
 	public void punchDown() {
-		getAnimation().stop();
+		getAnimation().pause();
 		getImageView().setViewport(punchDown);
 	}
 
 	public void punchLeft() {
-		getAnimation().stop();
+		getAnimation().pause();
 		getImageView().setViewport(punchLeft);
 	}
 
 	public void punchUp() {
-		getAnimation().stop();
+		getAnimation().pause();
 		getImageView().setViewport(punchUp);
 	}
 
 	public void punchRight() {
-		getAnimation().stop();
+		getAnimation().pause();
 		getImageView().setViewport(punchRight);
 	}
 

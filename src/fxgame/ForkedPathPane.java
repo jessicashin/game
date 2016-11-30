@@ -9,6 +9,7 @@ import fxgame.Game.GameState;
 import javafx.animation.FadeTransition;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
@@ -39,7 +40,7 @@ public class ForkedPathPane {
 
 		InteractionBox readSign = new InteractionBox(
 			new Rectangle2D(520, 230, 20, 2), KeyCode.UP,
-			"Remember! Press [C] to fight\nenemies."
+			"Remember! Press [C] or [SPACE]\nto fight enemies."
 		);
 		interactions.add(readSign);
 
@@ -86,7 +87,11 @@ public class ForkedPathPane {
 			player.setXPos(Game.WINDOW_WIDTH - Controller.OFFSCREEN_X);
 		pane.getChildren().add(player.getImageView());
 
-		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
+		for (ImageView image : Game.getPlayerPunch().getAllImages()) {
+			pane.getChildren().remove(image);
+		}
+
+		Game.getPlayerController().setVals(pane, sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.FORKED_PATH);
 
 		fadeTransition.play();

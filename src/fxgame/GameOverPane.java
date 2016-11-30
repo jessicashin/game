@@ -78,8 +78,6 @@ public class GameOverPane {
 					gameOverMusic.stop();
 					Game.setPane(GameState.ROOM);
 					Game.getPlayerController().start();
-					event.consume();
-					e.consume();
 				}
 				else if (e.getCode() == KeyCode.ESCAPE) {
 					Platform.exit();

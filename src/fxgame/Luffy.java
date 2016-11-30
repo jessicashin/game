@@ -32,15 +32,15 @@ public class Luffy extends AnimatedSprite {
 	private static final Rectangle2D faceFront = new Rectangle2D(0, FRONT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
 
 	private static final Text dialogue = new Text("Woof woof! Woof!");
-	private static final Text heartText = new Text("\u2764 \u2764 \u2764");
+	private static final Text heartText = new Text("\u2764   \u2764   \u2764");
 	private final InteractionBox interactionBox = new InteractionBox(
-		new Rectangle2D(0, 0, 4, getHeight()), KeyCode.RIGHT, dialogue, heartText
+		new Rectangle2D(0, 0, 4, 4), KeyCode.RIGHT, dialogue, heartText
 	);
 
 	Luffy() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
 		this.setSpeed(60);
-		this.setCBox(10, 18, 32, 5);
+		this.setCBox(8, 18, 36, 3);
 		dialogue.setFill(Color.WHITE);
 		dialogue.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/Sans.ttf"), 26));
 		dialogue.setWrappingWidth(500);

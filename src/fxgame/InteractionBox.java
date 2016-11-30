@@ -90,10 +90,10 @@ public class InteractionBox {
 			TypewriterAnimation animation = new TypewriterAnimation(texts[i].getText(), texts[i]);
 			animations[i] = animation;
 			typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration), e -> animation.play()));
-			duration += animation.getCycleDuration().toMillis() + 500;
+			duration += animation.getCycleDuration().toMillis() + 400;
 			texts[i].setText("");
 			if (i == texts.length-1) {
-				typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration - 500)));
+				typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration - 400)));
 			}
 		}
 		typewriterTimeline.setOnFinished(e -> animationFinished = true);
