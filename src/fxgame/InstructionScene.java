@@ -28,8 +28,8 @@ public class InstructionScene {
 		luffy.setViewport(new Rectangle2D(0, 200*2.5, 52*2.5, 40*2.5));
 		luffyAnimation.setCycleCount(Animation.INDEFINITE);
 		luffyAnimation.play();
-		luffy.setX(382);
-		luffy.setY(316);
+		luffy.setX(379);
+		luffy.setY(314);
 		pane.getChildren().add(luffy);
 	}
 

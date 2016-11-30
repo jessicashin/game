@@ -58,6 +58,7 @@ public class Controller {
 					double timeSinceStart = (timestamp - startTimerTime) / 1_000_000_000.0;
 					if (Game.getCurrentState() == GameState.ROOM && timeSinceStart > 1.6)
 						animateDog(elapsedSeconds);
+					setDogInteractionBox();
 					reorderNodes();
 				}
 				lastUpdateTime.set(timestamp);
@@ -96,6 +97,8 @@ public class Controller {
 				case LEFT:	player.walkLeft(); break;
 
 				case Z: case ENTER:	checkIfInteracting(); break;
+
+				case C: case SHIFT: break;
 
 				case ESCAPE: Platform.exit();
 				default: break;
@@ -246,6 +249,37 @@ public class Controller {
 				case 1: monster.walkLeft(); break;
 				case 2: monster.walkRight();
 			}
+		}
+	}
+
+	private static void setDogInteractionBox() {
+		dog.getInteractionBox().setDirection(player.getDirection());
+		switch(player.getDirection()) {
+			case UP:
+				dog.getInteractionBox().setBox(
+					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX(),
+						dog.getYPos() + dog.getCBoxOffsetY() + dog.getCBoxHeight(), dog.getCBoxWidth(), 4)
+				);
+				break;
+			case RIGHT:
+				dog.getInteractionBox().setBox(
+					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX() - 4,
+						dog.getYPos() + dog.getCBoxOffsetY(), 4, dog.getCBoxHeight())
+				);
+				break;
+			case DOWN:
+				dog.getInteractionBox().setBox(
+					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX(),
+						dog.getYPos() + dog.getCBoxOffsetY() - 4, dog.getCBoxWidth(), 4)
+				);
+				break;
+			case LEFT:
+				dog.getInteractionBox().setBox(
+					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX() + dog.getCBoxWidth(),
+						dog.getYPos() + dog.getCBoxOffsetY(), 4, dog.getCBoxHeight())
+				);
+				break;
+			default: break;
 		}
 	}
 

@@ -22,6 +22,11 @@ public class Brinn extends AnimatedSprite {
 	private static final int BACK_OFFSET_Y = SPRITE_HEIGHT*2;
 	private static final int RIGHT_OFFSET_Y = SPRITE_HEIGHT*3;
 
+	private static final Rectangle2D punchDown = new Rectangle2D(0, SPRITE_HEIGHT*4, SPRITE_WIDTH, SPRITE_HEIGHT);
+	private static final Rectangle2D punchLeft = new Rectangle2D(SPRITE_WIDTH, SPRITE_HEIGHT*4, SPRITE_WIDTH, SPRITE_HEIGHT);
+	private static final Rectangle2D punchUp = new Rectangle2D(SPRITE_WIDTH*2, SPRITE_HEIGHT*4, SPRITE_WIDTH, SPRITE_HEIGHT);
+	private static final Rectangle2D punchRight = new Rectangle2D(SPRITE_WIDTH*3, SPRITE_HEIGHT*4, SPRITE_WIDTH, SPRITE_HEIGHT);
+
 	private int hearts = 1;
 	private int maxHearts = 1; // maxHearts will increase as player levels up
 	private int level = 1;
@@ -78,6 +83,26 @@ public class Brinn extends AnimatedSprite {
 	public void walkRight() {
 		super.walkRight();
 		this.getAnimation().setOffsetY(RIGHT_OFFSET_Y);
+	}
+
+	public void punchDown() {
+		getAnimation().stop();
+		getImageView().setViewport(punchDown);
+	}
+
+	public void punchLeft() {
+		getAnimation().stop();
+		getImageView().setViewport(punchLeft);
+	}
+
+	public void punchUp() {
+		getAnimation().stop();
+		getImageView().setViewport(punchUp);
+	}
+
+	public void punchRight() {
+		getAnimation().stop();
+		getImageView().setViewport(punchRight);
 	}
 
 

@@ -2,6 +2,9 @@ package fxgame;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public class Luffy extends AnimatedSprite {
@@ -24,14 +27,26 @@ public class Luffy extends AnimatedSprite {
 	private static final int WALK_RIGHT_OFFSET_Y = SPRITE_HEIGHT*7;
 	private static final int STAND_BACK_OFFSET_Y = SPRITE_HEIGHT*8;
 
-	private final Rectangle2D layLeft = new Rectangle2D(0, LAY_LEFT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
-	private final Rectangle2D layRight = new Rectangle2D(0, LAY_RIGHT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
-	private final Rectangle2D faceFront = new Rectangle2D(0, FRONT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
+	private static final Rectangle2D layLeft = new Rectangle2D(0, LAY_LEFT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
+	private static final Rectangle2D layRight = new Rectangle2D(0, LAY_RIGHT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
+	private static final Rectangle2D faceFront = new Rectangle2D(0, FRONT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
+
+	private static final Text dialogue = new Text("Woof woof! Woof!");
+	private static final Text heartText = new Text("\u2764 \u2764 \u2764");
+	private final InteractionBox interactionBox = new InteractionBox(
+		new Rectangle2D(0, 0, 4, getHeight()), KeyCode.RIGHT, dialogue, heartText
+	);
 
 	Luffy() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
 		this.setSpeed(60);
-		this.setCBox(6, 18, 40, 5);
+		this.setCBox(10, 18, 32, 5);
+		dialogue.setFill(Color.WHITE);
+		dialogue.setFont(Font.loadFont(getClass().getResourceAsStream("fonts/Sans.ttf"), 26));
+		dialogue.setWrappingWidth(500);
+		dialogue.setLineSpacing(6);
+		heartText.setFill(Color.WHITE);
+		heartText.setFont(new Font(26));
 	}
 
 
@@ -98,6 +113,10 @@ public class Luffy extends AnimatedSprite {
 		getAnimation().setOffsetY(WALK_RIGHT_OFFSET_Y);
 		getAnimation().play();
 		setDirection(KeyCode.RIGHT);
+	}
+
+	public InteractionBox getInteractionBox() {
+		return interactionBox;
 	}
 
 	public void eatItem(Sprite item) {

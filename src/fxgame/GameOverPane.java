@@ -76,9 +76,10 @@ public class GameOverPane {
 			Game.getScene().setOnKeyPressed(e -> {
 				if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.Z) {
 					gameOverMusic.stop();
-					if (Game.getCurrentState() == GameState.GAME_OVER)
-						Game.setPane(GameState.ROOM);
+					Game.setPane(GameState.ROOM);
 					Game.getPlayerController().start();
+					event.consume();
+					e.consume();
 				}
 				else if (e.getCode() == KeyCode.ESCAPE) {
 					Platform.exit();

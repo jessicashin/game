@@ -98,33 +98,37 @@ public class RoomPane {
 		interactions.add(bookshelf);
 		interactions.add(drawers);
 
+		interactions.add(dog.getInteractionBox());
+
 		exits.put(KeyCode.DOWN, GameState.HOME);
 	}
 
 	public static Pane getPane() {
-		pane.setOpacity(0);
-		FadeTransition fadeTransition = new FadeTransition(Duration.millis(300), pane);
-		fadeTransition.setFromValue(0.0);
-		fadeTransition.setToValue(1.0);
+		if (Game.getCurrentState() != GameState.ROOM) {
+			pane.setOpacity(0);
+			FadeTransition fadeTransition = new FadeTransition(Duration.millis(300), pane);
+			fadeTransition.setFromValue(0.0);
+			fadeTransition.setToValue(1.0);
 
-		if (Game.getCurrentState() == GameState.INSTRUCTION || Game.getCurrentState() == GameState.GAME_OVER) {
-			player.setPos(Game.WINDOW_WIDTH/2 - player.getWidth()/2, Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
-			player.standFront();
+			if (Game.getCurrentState() == GameState.INSTRUCTION || Game.getCurrentState() == GameState.GAME_OVER) {
+				player.setPos(Game.WINDOW_WIDTH/2 - player.getWidth()/2, Game.WINDOW_HEIGHT/2 - player.getHeight()/2);
+				player.standFront();
+			}
+
+			else player.setPos(302, Game.WINDOW_HEIGHT - Controller.OFFSCREEN_Y);
+
+			pane.getChildren().add(player.getImageView());
+
+			// Position Luffy on dog bed
+			dog.setPos(423, 320);
+			dog.layLeft();
+
+			Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
+			Game.setCurrentState(GameState.ROOM);
+
+			music.play();
+			fadeTransition.play();
 		}
-
-		else player.setPos(302, Game.WINDOW_HEIGHT - Controller.OFFSCREEN_Y);
-
-		pane.getChildren().add(player.getImageView());
-
-		// Position Luffy on dog bed
-		dog.setPos(423, 320);
-		dog.layLeft();
-
-		Game.getPlayerController().setVals(sprites, monsters, obstacles, interactions, exits);
-		Game.setCurrentState(GameState.ROOM);
-
-		music.play();
-		fadeTransition.play();
 
 		return pane;
 	}

@@ -31,12 +31,15 @@ public class Sprite implements Comparable<Sprite> {
 	}
 
 	Sprite(int width, int height) {
+		this();
 		this.width = width;
 		this.height = height;
+	}
+
+	Sprite() {
 		xVelocity = 0;
 		yVelocity = 0;
 	}
-
 
 	public String getImagePath() {
 		return imagePath;

@@ -90,10 +90,10 @@ public class InteractionBox {
 			TypewriterAnimation animation = new TypewriterAnimation(texts[i].getText(), texts[i]);
 			animations[i] = animation;
 			typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration), e -> animation.play()));
-			duration += animation.getCycleDuration().toMillis() + 800;
+			duration += animation.getCycleDuration().toMillis() + 500;
 			texts[i].setText("");
 			if (i == texts.length-1) {
-				typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration - 800)));
+				typewriterTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration - 500)));
 			}
 		}
 		typewriterTimeline.setOnFinished(e -> animationFinished = true);
@@ -107,8 +107,16 @@ public class InteractionBox {
 		return box;
 	}
 
+	public void setBox(Rectangle2D box) {
+		this.box = box;
+	}
+
 	public KeyCode getDirection() {
 		return direction;
+	}
+
+	public void setDirection(KeyCode direction) {
+		this.direction = direction;
 	}
 
 	public TypewriterAnimation getTextAnimation() {
