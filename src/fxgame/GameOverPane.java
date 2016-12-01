@@ -4,6 +4,7 @@ import fxgame.Game.GameState;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
@@ -51,6 +52,7 @@ public class GameOverPane {
 
 		gameOverPane.getChildren().addAll(gameOverStack, restartText);
 		gameOverPane.setSpacing(50);
+		VBox.setMargin(gameOverStack, new Insets(50, 0, 0, 0));
 		gameOverPane.setAlignment(Pos.CENTER);
 		gameOverPane.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
 		gameOverPane.setMinSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);

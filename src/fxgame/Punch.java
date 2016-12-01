@@ -26,9 +26,9 @@ public class Punch extends Sprite {
 
 	public void punchRight() {
 		this.setImageView(IMAGE_RIGHT);
-		this.setXPos(Game.getPlayer().getXPos() + 16);
+		this.setXPos(Game.getPlayer().getXPos() + 25);
 		this.setYPos(Game.getPlayer().getYPos() + 38);
-		this.setWidth(39);
+		this.setWidth(30);
 		this.setHeight(12);
 		this.setCBox(0, -2, getWidth()+2, getHeight()+4);
 	}

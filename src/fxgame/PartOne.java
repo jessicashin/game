@@ -301,11 +301,10 @@ public class PartOne {
 		Sprite sprite = entityHash.get(name);
 		ImageView imageView;
 		Animation animation;
+		Image temp = new Image(sprite.getImagePath());
 		if (scale >= 1) {
 			Image image = new Image (
-					sprite.getImagePath(), sprite.getWidth()*animationHash.get(name).get("columns")*scale,
-					sprite.getHeight()*(animationHash.get(name).get("count")/animationHash.get(name).get("columns"))*scale,
-					true, false
+					sprite.getImagePath(), temp.getWidth()*scale, temp.getHeight()*scale, true, false
 			);
 			imageView = new ImageView(image);
 	        imageView.setViewport(new Rectangle2D(0, 0, sprite.getWidth()*scale, sprite.getHeight()*scale));

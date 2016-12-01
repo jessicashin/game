@@ -21,7 +21,7 @@ public class Skeleton extends AnimatedSprite {
 
 	Skeleton() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
-		this.setSpeed(80);
+		this.setSpeed(90);
 		this.setCBox(7, 27, 34, 28);
 	}
 

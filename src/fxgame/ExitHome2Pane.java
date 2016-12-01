@@ -8,6 +8,7 @@ import java.util.Map;
 import fxgame.Game.GameState;
 import javafx.animation.FadeTransition;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -40,6 +41,11 @@ public class ExitHome2Pane {
 		Sprite sign = new Sign();
 		sign.setPos(378, 174);
 		sprites.add(sign);
+
+		ColorAdjust colorAdjust = new ColorAdjust();
+		colorAdjust.setSaturation(-0.6);
+		colorAdjust.setBrightness(-0.35);
+		sign.getImageView().setEffect(colorAdjust);
 
 		Text signText = new Text("TURN BACK SOUTH. DANGER PAST\nTHIS POINT...");
 		signText.setFont(Font.loadFont(ExitHome2Pane.class.getResourceAsStream("fonts/Papyrus.ttf"), 26));

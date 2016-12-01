@@ -47,6 +47,7 @@ public class TitleScene {
 		vbox.setMaxSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 		vbox.setPrefSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 		vbox.setSpacing(50);
+		VBox.setMargin(titleStack, new Insets(50, 0, 0, 0));
 		vbox.setAlignment(Pos.CENTER);
 		vbox.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
 

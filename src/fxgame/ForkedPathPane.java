@@ -40,7 +40,7 @@ public class ForkedPathPane {
 
 		InteractionBox readSign = new InteractionBox(
 			new Rectangle2D(520, 230, 20, 2), KeyCode.UP,
-			"Remember! Press [C] or [SPACE]\nto fight enemies."
+			"Remember! Press [C] or [SPACE]\nto fight monsters."
 		);
 		interactions.add(readSign);
 
