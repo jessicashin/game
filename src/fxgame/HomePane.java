@@ -9,7 +9,6 @@ import fxgame.Game.GameState;
 import javafx.animation.FadeTransition;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
@@ -63,10 +62,6 @@ public class HomePane {
 		else player.setYPos(Game.WINDOW_HEIGHT - Controller.OFFSCREEN_Y);
 
 		pane.getChildren().add(player.getImageView());
-
-		for (ImageView image : Game.getPlayerPunch().getAllImages()) {
-			pane.getChildren().remove(image);
-		}
 
 		Game.getPlayerController().setVals(pane, sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.HOME);

@@ -12,7 +12,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
@@ -100,10 +99,6 @@ public class SkeletonsPane {
 			player.setXPos(-Controller.OFFSCREEN_X);
 
 		pane.getChildren().add(player.getImageView());
-
-		for (ImageView image : Game.getPlayerPunch().getAllImages()) {
-			pane.getChildren().remove(image);
-		}
 
 		for (Sprite monster : monsters) {
 			if (!pane.getChildren().contains(monster.getImageView()))

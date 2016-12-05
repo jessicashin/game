@@ -197,6 +197,7 @@ public class Controller {
 
 		GameState newScene = checkIfExit(newX, newY);
 		if (newScene != null) {
+			pane.getChildren().remove(playerPunch.getImageView());
 			Game.setPane(newScene);
 		}
 
