@@ -17,6 +17,7 @@ import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
@@ -68,6 +69,32 @@ public class Controller {
 		new KeyFrame(Duration.millis(180), e -> isPunching = false)
 	);
 
+	private static final AudioClip playerDamagedSound = new AudioClip(
+		Controller.class.getResource("audio/player_damaged.wav").toString()
+	);
+
+	private static boolean isDamageImmune = false;
+	private static ColorAdjust damageColor = new ColorAdjust();
+	private static Timeline damageTimeline = new Timeline(
+		new KeyFrame(Duration.ZERO, e -> {
+			playerDamagedSound.play();
+			player.getImageView().setEffect(damageColor);
+			isDamageImmune = true;
+			player.setCBox(5, 36, 27, 19);
+		}),
+		new KeyFrame(Duration.millis(100), e -> player.getImageView().setEffect(null)),
+		new KeyFrame(Duration.millis(200), e -> player.getImageView().setEffect(damageColor)),
+		new KeyFrame(Duration.millis(300), e -> player.getImageView().setEffect(null)),
+		new KeyFrame(Duration.millis(400), e -> player.getImageView().setEffect(damageColor)),
+		new KeyFrame(Duration.millis(500), e -> player.getImageView().setEffect(null)),
+		new KeyFrame(Duration.millis(600), e -> player.getImageView().setEffect(damageColor)),
+		new KeyFrame(Duration.millis(800), e -> {
+			player.getImageView().setEffect(null);
+			isDamageImmune = false;
+			player.setCBox(3, 34, 31, 23);
+		})
+	);
+
 	private static final AudioClip wooshSound = new AudioClip(
 		Controller.class.getResource("audio/woosh.wav").toString()
 	);
@@ -80,6 +107,9 @@ public class Controller {
 	public static final int OFFSCREEN_Y = 31;
 
 	Controller() {
+		damageColor.setSaturation(-0.6);
+		damageColor.setBrightness(-0.35);
+
 		animationTimer = new AnimationTimer() {
 			@Override
 			public void handle(long timestamp) {
@@ -116,6 +146,10 @@ public class Controller {
 		Controller.obstacles = obstacles;
 		Controller.interactions = interactions;
 		Controller.exits = exits;
+		for (int i = 0; i < player.getHearts().size(); i++) {
+			player.getHearts().get(i).setPos(i*25 + 20, 20);
+			pane.getChildren().add(player.getHearts().get(i).getImageView());
+		}
 	}
 
 	private static final Set<KeyCode> keysPressed = new HashSet<KeyCode>();
@@ -191,23 +225,27 @@ public class Controller {
 		double oldY = player.getYPos();
 		double newY = Math.max(0 - OFFSCREEN_Y, Math.min(scene.getHeight() - OFFSCREEN_Y, oldY + deltaY));
 
-		if (!checkForObstacleCollision(player, newX, newY)) {
-			player.setPos(newX, newY);
-		}
-
-		GameState newScene = checkIfExit(newX, newY);
-		if (newScene != null) {
-			pane.getChildren().remove(playerPunch.getImageView());
-			Game.setPane(newScene);
-		}
-
-		// Check if the player has attacked a monster
-		if (isPunching) {
-			checkIfPunchedMonster();
-		}
-
 		// Check if the player has collided with a monster (without attacking)
-		checkForMonsterCollision(newX, newY);
+		if (!checkForMonsterCollision(newX, newY)) {
+
+			if (!checkForObstacleCollision(player, newX, newY)) {
+				player.setPos(newX, newY);
+			}
+
+			GameState newScene = checkIfExit(newX, newY);
+			if (newScene != null) {
+				pane.getChildren().remove(playerPunch.getImageView());
+				for (Heart heart : player.getHearts()) {
+					pane.getChildren().remove(heart.getImageView());
+				}
+				Game.setPane(newScene);
+			}
+
+			// Check if the player has attacked a monster
+			if (isPunching) {
+				checkIfPunchedMonster();
+			}
+		}
 	}
 
 	private static void playerPunch() {
@@ -443,6 +481,12 @@ public class Controller {
 					return true;
 				}
 			}
+			// Check for collision with player if player is damage immune
+			if (isDamageImmune && sprite != player && s == player) {
+				if (s.getCBox().intersects(sprite.getNewCBox(newX, newY))) {
+					return true;
+				}
+			}
 		}
 		for (Rectangle2D obstacle : obstacles) {
 			if (obstacle.intersects(sprite.getNewCBox(newX, newY))) {
@@ -468,16 +512,30 @@ public class Controller {
 		}
 	}
 
-	// Check if player has collided with a monster and if so call game over
-	private static void checkForMonsterCollision(double newX, double newY) {
+	// Check if player has collided with a monster and if so update hearts
+	// return true if game over and false otherwise
+	private static boolean checkForMonsterCollision(double newX, double newY) {
 		for (Sprite monster : monsters) {
-			if (monster.getCBox().intersects(player.getNewCBox(newX, newY))) {
-				scene.setOnKeyPressed(empty -> {});
-				player.setPos(-100, -100);
-				Game.setPane(GameState.GAME_OVER);
+			if (monster.getCBox().intersects(player.getNewCBox(newX, newY)) && !isDamageImmune) {
+				pane.getChildren().remove(player.getHearts().get(player.getHearts().size()-1).getImageView());
+				player.loseHeart();
+				if (player.getHearts().isEmpty()) {
+					scene.setOnKeyPressed(e -> {
+						if (e.getCode() == KeyCode.ESCAPE)
+							Platform.exit();
+					});
+					player.setPos(-100, -100);
+					pane.getChildren().remove(playerPunch.getImageView());
+					animationTimer.stop();
+					Game.setPane(GameState.GAME_OVER);
+					player.revive();
+					return true;
+				}
+				else damageTimeline.play();
 				break;
 			}
 		}
+		return false;
 	}
 
 	// Change the z-order of sprites on the pane based on xPos of collision box

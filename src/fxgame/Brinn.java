@@ -1,5 +1,6 @@
 package fxgame;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,17 +28,21 @@ public class Brinn extends AnimatedSprite {
 	private static final Rectangle2D punchUp = new Rectangle2D(SPRITE_WIDTH*2, SPRITE_HEIGHT*4, SPRITE_WIDTH, SPRITE_HEIGHT);
 	private static final Rectangle2D punchRight = new Rectangle2D(SPRITE_WIDTH*3, SPRITE_HEIGHT*4, SPRITE_WIDTH, SPRITE_HEIGHT);
 
-	private int hearts = 1;
-	private int maxHearts = 1; // maxHearts will increase as player levels up
+	private List<Heart> hearts = new LinkedList<Heart>();
+	private int maxHearts = 3; // maxHearts will increase as player levels up
 	private int level = 1;
 
-	private List<Sprite> carriedItems = new LinkedList<Sprite>();
+	private List<Sprite> carriedItems = new ArrayList<Sprite>();
 
 
 	Brinn() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT, SPRITE_COUNT, SPRITE_COLUMNS, ANIM_DURATION);
 		this.setSpeed(140);
 		this.setCBox(3, 34, 31, 23);
+
+		for (int i = 0; i < maxHearts; i++) {
+			this.hearts.add(new Heart());
+		}
 	}
 
 
@@ -134,21 +139,30 @@ public class Brinn extends AnimatedSprite {
 	}
 
 
-	public int getHearts() {
+	public List<Heart> getHearts() {
 		return hearts;
 	}
 
-	public void setHearts(int hearts) {
-		this.hearts = hearts;
+	public void restoreHeart() {
+		this.hearts.add(new Heart());
 	}
 
+	public void loseHeart() {
+		this.hearts.remove(hearts.size()-1);
+	}
 
-	public int getFullHearts() {
+	public void revive() {
+		for (int i = 0; i < maxHearts; i++) {
+			this.hearts.add(new Heart());
+		}
+	}
+
+	public int getMaxHearts() {
 		return maxHearts;
 	}
 
-	public void setFullHearts(int fullHearts) {
-		this.maxHearts = fullHearts;
+	public void setMaxHearts(int max) {
+		maxHearts = max;
 	}
 
 	public int getLevel() {
