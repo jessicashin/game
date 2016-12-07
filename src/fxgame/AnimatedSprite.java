@@ -82,4 +82,8 @@ public abstract class AnimatedSprite extends Sprite {
 		return (direction == KeyCode.LEFT);
 	}
 
+	public Sprite itemDrop() {
+		return null;
+	}
+
 }

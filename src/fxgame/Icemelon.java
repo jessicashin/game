@@ -1,11 +1,15 @@
 package fxgame;
 
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 // Sprite made with JavaFX shapes
 public class Icemelon extends Sprite {
+
+	private double xPos;
+	private double yPos;
 
 	private Group sprite;
 	private static final int SPRITE_WIDTH = 22;
@@ -85,6 +89,41 @@ public class Icemelon extends Sprite {
 
 	public Group getSprite() {
 		return sprite;
+	}
+
+	@Override
+	public double getXPos() {
+		return xPos;
+	}
+
+	@Override
+	public void setXPos(double x) {
+		xPos = x;
+		sprite.setTranslateX(x);
+	}
+
+	@Override
+	public double getYPos() {
+		return yPos;
+	}
+
+	@Override
+	public void setYPos(double y) {
+		yPos = y;
+		sprite.setTranslateY(y);
+	}
+
+	@Override
+	public void setPos(double x, double y) {
+		setXPos(x);
+		setYPos(y);
+		sprite.setTranslateX(x);
+		sprite.setTranslateY(y);
+	}
+
+	@Override
+	public Rectangle2D getBounds() {
+		return new Rectangle2D(xPos, yPos, getWidth(), getHeight());
 	}
 
 }

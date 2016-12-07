@@ -1,7 +1,9 @@
 package fxgame;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -44,6 +46,7 @@ public class Controller {
 	private static List<Rectangle2D> obstacles;
 	private static List<InteractionBox> interactions;
 	private static Map<KeyCode, GameState> exits;
+	private static List<Sprite> droppedItems = new ArrayList<Sprite>();
 
 	private static Pane currentModalPane = null;
 
@@ -102,6 +105,10 @@ public class Controller {
 	);
 	private static final AudioClip bashSound = new AudioClip(
 		Controller.class.getResource("audio/bash.wav").toString()
+	);
+
+	private static final AudioClip bopSound = new AudioClip(
+		Controller.class.getResource("audio/bop.wav").toString()
 	);
 
 	// How far the player can travel outside the scene (to travel to another scene)
@@ -237,9 +244,11 @@ public class Controller {
 			GameState newScene = checkIfExit(newX, newY);
 			if (newScene != null) {
 				pane.getChildren().remove(playerPunch.getImageView());
-				for (Heart heart : player.getHearts()) {
+				for (Heart heart : player.getHearts())
 					pane.getChildren().remove(heart.getImageView());
-				}
+				for (Sprite sprite : droppedItems)
+					pane.getChildren().remove(sprite.getImageView());
+				droppedItems.clear();
 				Game.setPane(newScene);
 			}
 
@@ -247,6 +256,9 @@ public class Controller {
 			if (isPunching) {
 				checkIfPunchedMonster();
 			}
+
+			// Collect items dropped by monsters
+			checkForItemCollision();
 		}
 	}
 
@@ -549,10 +561,17 @@ public class Controller {
 
 	// Check if player has punched a monster
 	private static void checkIfPunchedMonster() {
-		for (Sprite monster : monsters) {
+		for (AnimatedSprite monster : monsters) {
 			if (monster.getBounds().intersects(playerPunch.getCBox())) {
 				bashSound.play();
 				pane.getChildren().remove(monster.getImageView());
+				Sprite itemDrop = monster.itemDrop();
+				if (itemDrop != null) {
+					droppedItems.add(itemDrop);
+					if (itemDrop instanceof Icemelon)
+						pane.getChildren().add(((Icemelon) itemDrop).getSprite());
+					else pane.getChildren().add(itemDrop.getImageView());
+				}
 				monster.setPos(0, -200);
 			}
 		}
@@ -566,22 +585,7 @@ public class Controller {
 				pane.getChildren().remove(player.getHearts().get(player.getHearts().size()-1).getImageView());
 				player.loseHeart();
 				if (player.getHearts().isEmpty()) {
-					scene.setOnKeyPressed(e -> {
-						if (e.getCode() == KeyCode.ESCAPE)
-							Platform.exit();
-					});
-					player.setPos(-100, -100);
-					pane.getChildren().remove(playerPunch.getImageView());
-					if (currentModalPane != null) {
-						for (InteractionBox box : interactions) {
-							if (box.getModalPane() == currentModalPane)
-								box.fastForwardText();
-						}
-						pane.getChildren().remove(currentModalPane);
-					}
-					animationTimer.stop();
-					Game.setPane(GameState.GAME_OVER);
-					player.revive();
+					gameOver();
 					return true;
 				}
 				else damageTimeline.play();
@@ -589,6 +593,43 @@ public class Controller {
 			}
 		}
 		return false;
+	}
+
+	private static void checkForItemCollision() {
+		Iterator<Sprite> iterator = droppedItems.iterator();
+		while (iterator.hasNext()) {
+			Sprite item = iterator.next();
+			if (player.getCBox().intersects(item.getBounds())) {
+				bopSound.play();
+				player.aquireItem(item);
+				if (item instanceof Icemelon)
+					pane.getChildren().remove(((Icemelon) item).getSprite());
+				else pane.getChildren().remove(item.getImageView());
+				iterator.remove();
+			}
+		}
+	}
+
+	private static void gameOver() {
+		scene.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.ESCAPE)
+				Platform.exit();
+		});
+		player.setPos(-100, -100);
+		pane.getChildren().remove(playerPunch.getImageView());
+		for (Sprite sprite : droppedItems)
+			pane.getChildren().remove(sprite.getImageView());
+		droppedItems.clear();
+		if (currentModalPane != null) {
+			for (InteractionBox box : interactions) {
+				if (box.getModalPane() == currentModalPane)
+					box.fastForwardText();
+			}
+			pane.getChildren().remove(currentModalPane);
+		}
+		animationTimer.stop();
+		Game.setPane(GameState.GAME_OVER);
+		player.revive();
 	}
 
 	// Change the z-order of sprites on the pane based on xPos of collision box

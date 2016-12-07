@@ -1,8 +1,12 @@
 package fxgame;
 
+import java.util.Random;
+
 import javafx.geometry.Rectangle2D;
 
 public class Skeleton extends AnimatedSprite {
+
+	private static final Random RANDOM = new Random();
 
 	private static final String IMAGE_PATH = "fxgame/images/skeleton.png";
 
@@ -68,6 +72,29 @@ public class Skeleton extends AnimatedSprite {
 	public void walkRight() {
 		super.walkRight();
 		this.getAnimation().setOffsetY(RIGHT_OFFSET_Y);
+	}
+
+	@Override
+	public Sprite itemDrop() {
+		// 1 in 3 chance of dropping a winterfruit
+		int randomChance = RANDOM.nextInt(3);
+		if (randomChance == 0) {
+			Winterfruit fruit = new Winterfruit();
+			fruit.setPos(getXPos() + getWidth()/2 - fruit.getWidth()/2,
+					getYPos() + getHeight() - fruit.getHeight());
+			return fruit;
+		}
+
+		// Small chance of dropping an icemelon (rare)
+		randomChance = RANDOM.nextInt(20);
+		if (randomChance == 0) {
+			Icemelon fruit = new Icemelon();
+			fruit.setPos(getXPos() + getWidth()/2 - fruit.getWidth()/2,
+					getYPos() + getHeight() - fruit.getHeight());
+			return fruit;
+		}
+
+		return null;
 	}
 
 }
