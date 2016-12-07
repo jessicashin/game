@@ -97,12 +97,4 @@ public class ExitHome2Pane {
 		return pane;
 	}
 
-	public static void addModalPane(Pane modalPane) {
-		pane.getChildren().add(modalPane);
-	}
-
-	public static void removeModalPane(Pane modalPane) {
-		pane.getChildren().remove(modalPane);
-	}
-
 }

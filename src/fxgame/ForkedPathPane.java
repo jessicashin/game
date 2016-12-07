@@ -71,6 +71,7 @@ public class ForkedPathPane {
 
 		exits.put(KeyCode.UP, GameState.EXIT_HOME2);
 		exits.put(KeyCode.RIGHT, GameState.SKELETONS);
+		exits.put(KeyCode.LEFT, GameState.SNOWMANS);
 
 	}
 
@@ -84,6 +85,9 @@ public class ForkedPathPane {
 			player.setYPos(-Controller.OFFSCREEN_Y);
 		else if (Game.getCurrentState() == GameState.SKELETONS)
 			player.setXPos(Game.WINDOW_WIDTH - Controller.OFFSCREEN_X);
+		else if (Game.getCurrentState() == GameState.SNOWMANS)
+			player.setXPos(-Controller.OFFSCREEN_X);
+
 		pane.getChildren().add(player.getImageView());
 
 		Game.getPlayerController().setVals(pane, sprites, monsters, obstacles, interactions, exits);
@@ -92,14 +96,6 @@ public class ForkedPathPane {
 		fadeTransition.play();
 
 		return pane;
-	}
-
-	public static void addModalPane(Pane modalPane) {
-		pane.getChildren().add(modalPane);
-	}
-
-	public static void removeModalPane(Pane modalPane) {
-		pane.getChildren().remove(modalPane);
 	}
 
 }

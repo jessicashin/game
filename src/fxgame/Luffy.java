@@ -32,7 +32,9 @@ public class Luffy extends AnimatedSprite {
 	private static final Rectangle2D faceFront = new Rectangle2D(0, FRONT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
 
 	private static final Text dialogue = new Text("Woof woof! Woof!");
-	private static final Text heartText = new Text("\u2764   \u2764   \u2764");
+	private int happinessLevel = 3;
+	private static final int maxHappiness = 10;
+	private static final Text heartText = new Text("\u2764  \u2764  \u2764");
 	private final InteractionBox interactionBox = new InteractionBox(
 		new Rectangle2D(0, 0, 4, 4), KeyCode.RIGHT, dialogue, heartText
 	);
@@ -117,6 +119,33 @@ public class Luffy extends AnimatedSprite {
 
 	public InteractionBox getInteractionBox() {
 		return interactionBox;
+	}
+
+	public void increaseHappiness() {
+		if (happinessLevel < maxHappiness) {
+			happinessLevel++;
+			StringBuilder sb = new StringBuilder("\u2764");
+			for (int i = 1; i < happinessLevel; i++) {
+				sb.append("  \u2764");
+			}
+			heartText.setText(sb.toString());
+		}
+	}
+
+	public void decreaseHappiness() {
+		if (happinessLevel > 0) {
+			happinessLevel--;
+			if (happinessLevel != 0) {
+				StringBuilder sb = new StringBuilder("\u2764");
+				for (int i = 1; i < happinessLevel; i++) {
+					sb.append("  \u2764");
+				}
+				heartText.setText(sb.toString());
+			}
+		}
+		else {
+			heartText.setText("... \u2639"); // sad face
+		}
 	}
 
 	public void eatItem(Sprite item) {

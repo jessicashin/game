@@ -24,7 +24,7 @@ public class InteractionBox {
 	private Rectangle2D box;
 	private KeyCode direction;
 	private Pane modalPane = new StackPane();
-	private Insets modalPaneInsets = new Insets(26, 26, 26, 26);
+	private static final Insets modalPaneInsets = new Insets(26, 26, 26, 26);
 	private TypewriterAnimation typewriter;
 
 	// variables for messages with multiple Text objects

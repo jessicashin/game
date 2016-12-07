@@ -95,6 +95,8 @@ public class Controller {
 		})
 	);
 
+	private static boolean foundFishingRod = false;
+
 	private static final AudioClip wooshSound = new AudioClip(
 		Controller.class.getResource("audio/woosh.wav").toString()
 	);
@@ -169,7 +171,7 @@ public class Controller {
 
 				case C: case SPACE:
 					if (Game.getCurrentState() != GameState.ROOM &&
-						!isPunching && !keyPressHasAttacked) {
+						!isPunching && !keyPressHasAttacked && !isDamageImmune) {
 						keyPressHasAttacked = true;
 						isPunching = true;
 						playerPunch();
@@ -314,26 +316,24 @@ public class Controller {
 		switch(player.getDirection()) {
 			case UP:
 				dog.getInteractionBox().setBox(
-					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX(),
-						dog.getYPos() + dog.getCBoxOffsetY() + dog.getCBoxHeight(), dog.getCBoxWidth(), 4)
+					new Rectangle2D(dog.getXPos(),
+						dog.getYPos() + dog.getCBoxOffsetY() + dog.getCBoxHeight(), dog.getWidth(), 20)
 				);
 				break;
 			case RIGHT:
 				dog.getInteractionBox().setBox(
-					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX() - 4,
-						dog.getYPos() + dog.getCBoxOffsetY(), 4, dog.getCBoxHeight())
+					new Rectangle2D(dog.getXPos() - 4, dog.getYPos(), 12, dog.getHeight())
 				);
 				break;
 			case DOWN:
 				dog.getInteractionBox().setBox(
-					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX(),
-						dog.getYPos() + dog.getCBoxOffsetY() - 4, dog.getCBoxWidth(), 4)
+					new Rectangle2D(dog.getXPos(), dog.getYPos(), dog.getWidth(), dog.getCBoxOffsetY())
 				);
 				break;
 			case LEFT:
 				dog.getInteractionBox().setBox(
 					new Rectangle2D(dog.getXPos() + dog.getCBoxOffsetX() + dog.getCBoxWidth(),
-						dog.getYPos() + dog.getCBoxOffsetY(), 4, dog.getCBoxHeight())
+						dog.getYPos(), 12, dog.getHeight())
 				);
 				break;
 			default: break;
@@ -347,13 +347,11 @@ public class Controller {
 				double deltaX = elapsedSeconds * monster.getXVelocity();
 				double deltaY = elapsedSeconds * monster.getYVelocity();
 				double oldX = monster.getXPos();
-				double newX = Math.max(
-					0, Math.min(Game.WINDOW_WIDTH - player.getWidth() - monster.getWidth(), oldX + deltaX)
-				);
+				double newX = Math.max(player.getWidth(),
+						Math.min(Game.WINDOW_WIDTH - player.getWidth() - monster.getWidth(), oldX + deltaX));
 				double oldY = monster.getYPos();
-				double newY = Math.max(
-					0, Math.min(Game.WINDOW_HEIGHT - player.getHeight() - monster.getHeight(), oldY + deltaY)
-				);
+				double newY = Math.max(player.getHeight(),
+						Math.min(Game.WINDOW_HEIGHT - player.getHeight() - monster.getHeight(), oldY + deltaY));
 				if (!checkForObstacleCollision(monster, newX, newY)) {
 					monster.setPos(newX, newY);
 				}
@@ -400,7 +398,8 @@ public class Controller {
 	// Check if player is facing something that can be interacted with
 	private static void checkIfInteracting() {
 		for (InteractionBox box : interactions) {
-			if (player.getCBox().intersects(box.getBox()) && player.getDirection() == box.getDirection()) {
+			if (player.getCBox().intersects(box.getBox()) &&
+					(player.getDirection() == box.getDirection() || box.getDirection() == KeyCode.ALL_CANDIDATES)) {
 				if (box == dog.getInteractionBox()) {
 					switch(player.getDirection()) {
 						case UP:	dog.setDirection(KeyCode.DOWN); break;
@@ -410,43 +409,68 @@ public class Controller {
 						default: break;
 					}
 				}
-				Game.addModalPane(box.getModalPaneAndPlay());
-				currentModalPane = box.getModalPane();
-				switch(player.getDirection()) {
-					case UP:	player.standBack(); break;
-					case RIGHT:	player.standRight(); break;
-					case DOWN:	player.standFront(); break;
-					case LEFT:	player.standLeft(); break;
-					default: break;
+				addModalPane(box);
+				if (Game.getCurrentState() == GameState.SKELETONS && !foundFishingRod) {
+					foundFishingRod = true;
+					interactions.remove(box);
+					interactions.add(new InteractionBox(box.getBox(), KeyCode.UP,
+							"I wonder who hid that fishing\nrod..."));
 				}
-				// Disable key events for player movement in modal view
-				scene.setOnKeyReleased(e -> {});
-				scene.setOnKeyPressed(e -> {
-					boolean animationsFinished = false;
-					if ((e.getCode() == KeyCode.Z || e.getCode() == KeyCode.ENTER)) {
-						if ((box.getTextAnimation() != null &&
-							box.getTextAnimation().getStatus() == Animation.Status.STOPPED) ||
-							box.isTextTimelineFinished()) {
-							animationsFinished = true;
-						}
-						if (animationsFinished) {
-							Game.removeModalPane(box.getModalPane());
-							currentModalPane = null;
-							keysPressed.clear();
-							startKeyPressedEventHandler();
-							startKeyReleasedEventHandler();
-						}
-					}
-					else if (e.getCode() == KeyCode.X || e.getCode() == KeyCode.SHIFT) {
-						box.fastForwardText();
-					}
-
-					else if (e.getCode() == KeyCode.ESCAPE) {
-						Platform.exit();
-					}
-				});
+				break;
 			}
 		}
+	}
+
+	private static void addModalPane(InteractionBox box) {
+		pane.getChildren().add(box.getModalPaneAndPlay());
+		currentModalPane = box.getModalPane();
+		switch(player.getDirection()) {
+			case UP:	player.standBack(); break;
+			case RIGHT:	player.standRight(); break;
+			case DOWN:	player.standFront(); break;
+			case LEFT:	player.standLeft(); break;
+			default: break;
+		}
+		// Disable key events for player movement in modal view
+		scene.setOnKeyReleased(e -> {});
+		scene.setOnKeyPressed(e -> {
+			boolean animationsFinished = false;
+			if ((e.getCode() == KeyCode.Z || e.getCode() == KeyCode.ENTER)) {
+				if ((box.getTextAnimation() != null &&
+					box.getTextAnimation().getStatus() == Animation.Status.STOPPED) ||
+					box.isTextTimelineFinished()) {
+					animationsFinished = true;
+				}
+				if (animationsFinished) {
+					pane.getChildren().remove(box.getModalPane());
+
+					// If the modal is from the blocked exits, move the player away from edge of window
+					// Restart animation timer
+					if (currentModalPane == SnowmansPane.getExitsInteractionBox().getModalPane()) {
+						switch(player.getDirection()) {
+							case UP:	player.setYPos(0); break;
+							case DOWN:	player.setYPos(scene.getHeight() - player.getHeight()); break;
+							case LEFT:	player.setXPos(0); break;
+							default: break;
+						}
+						SnowmansPane.restartMonstersTimeline();
+						animationTimer.start();
+					}
+
+					currentModalPane = null;
+					keysPressed.clear();
+					startKeyPressedEventHandler();
+					startKeyReleasedEventHandler();
+				}
+			}
+			else if (e.getCode() == KeyCode.X || e.getCode() == KeyCode.SHIFT) {
+				box.fastForwardText();
+			}
+
+			else if (e.getCode() == KeyCode.ESCAPE) {
+				Platform.exit();
+			}
+		});
 	}
 
 	// Check if player is exiting scene
@@ -465,8 +489,22 @@ public class Controller {
 		else if (x == 0 - OFFSCREEN_X && exits.containsKey(KeyCode.LEFT) && player.isFacingLeft())
 			return exits.get(KeyCode.LEFT);
 
+		// Block exits from Snowmans pane until further development...
+		// Display modal and stop animation
+		else if (Game.getCurrentState() == GameState.SNOWMANS &&
+				((y < -8 && player.isFacingUp()) ||
+				(y > scene.getHeight() - player.getHeight() + 8 && player.isFacingDown()) ||
+				(x < -6 && player.isFacingLeft()))) {
+					SnowmansPane.pauseMonstersTimeline();
+					for (Sprite monster : monsters) {
+						monster.setVelocity(0, 0);
+					}
+					animationTimer.stop();
+					addModalPane(SnowmansPane.getExitsInteractionBox());
+		}
+
 		// If igloo door, change to room scene
-		else if (x > 256 && x < 294 && y < 340 && Game.getCurrentState() == GameState.HOME
+		else if (Game.getCurrentState() == GameState.HOME && x > 256 && x < 294 && y < 340
 				&& player.isFacingUp())
 			return GameState.ROOM;
 
@@ -494,8 +532,16 @@ public class Controller {
 			}
 		}
 
-		// Temporarily hard-coded for skeletons pane TODO
-		if (monsters.contains(sprite) && newX < 192 + player.getWidth())
+		if (Game.getCurrentState() == GameState.SKELETONS && monsters.contains(sprite)
+				&& (newX < 230 || newX > 550 - sprite.getWidth()))
+			return true;
+
+		else if (Game.getCurrentState() == GameState.RIGHT_CLIFF && monsters.contains(sprite)
+				&& newX < 130)
+			return true;
+
+		else if (Game.getCurrentState() == GameState.SNOWMANS && monsters.contains(sprite)
+				&& newX > 534 - sprite.getWidth())
 			return true;
 
 		return false;
@@ -526,6 +572,13 @@ public class Controller {
 					});
 					player.setPos(-100, -100);
 					pane.getChildren().remove(playerPunch.getImageView());
+					if (currentModalPane != null) {
+						for (InteractionBox box : interactions) {
+							if (box.getModalPane() == currentModalPane)
+								box.fastForwardText();
+						}
+						pane.getChildren().remove(currentModalPane);
+					}
 					animationTimer.stop();
 					Game.setPane(GameState.GAME_OVER);
 					player.revive();
@@ -546,6 +599,8 @@ public class Controller {
 		}
 		if (currentModalPane != null)
 			currentModalPane.toFront();
+		for (Heart heart : player.getHearts())
+			heart.getImageView().toFront();
 	}
 
 }

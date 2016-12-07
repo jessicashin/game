@@ -15,7 +15,7 @@ public class TypewriterAnimation extends Transition {
 	);
 
 	public TypewriterAnimation(String string, Text text) {
-		textSoundEffect.setVolume(3);
+		textSoundEffect.setVolume(1.5);
 		fullText = string;
 		displayedText = text;
 		setCycleDuration(Duration.millis(string.length()*30));
@@ -32,6 +32,10 @@ public class TypewriterAnimation extends Transition {
         if (displayedText.getText().equals(fullText)) {
         	stop();
         }
+	}
+
+	public void clearDisplayedText() {
+		displayedText.setText("");
 	}
 
 }

@@ -95,8 +95,13 @@ public class RoomPane {
 			new Rectangle2D(425, 158, 80, 1), KeyCode.UP,
 			"Your drawers are empty!"
 		);
+		InteractionBox bed = new InteractionBox(
+			new Rectangle2D(157, 171, 20, 36), KeyCode.ALL_CANDIDATES,
+			"Want to take a rest?"
+		);
 		interactions.add(bookshelf);
 		interactions.add(drawers);
+		interactions.add(bed);
 
 		interactions.add(dog.getInteractionBox());
 
@@ -131,14 +136,6 @@ public class RoomPane {
 		}
 
 		return pane;
-	}
-
-	public static void addModalPane(Pane modalPane) {
-		pane.getChildren().add(modalPane);
-	}
-
-	public static void removeModalPane(Pane modalPane) {
-		pane.getChildren().remove(modalPane);
 	}
 
 	public static void stopMusic() {

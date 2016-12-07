@@ -16,16 +16,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.Pane;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-public class SkeletonsPane {
+public class RightCliffPane {
 
 	private static final Random RANDOM = new Random();
 
 	private static final Pane pane = new Pane();
-	private static final Image bgImage = new Image("fxgame/images/skeletonspane.png");
+	private static final Image bgImage = new Image("fxgame/images/rightcliff.png");
 
 	private static final Brinn player = Game.getPlayer();
 	private static final List<Sprite> sprites = new ArrayList<Sprite>();
@@ -54,54 +52,54 @@ public class SkeletonsPane {
 	static {
 		sprites.add(player);
 
-		monstersTimeline.setCycleCount(Timeline.INDEFINITE);
-		monstersTimeline.play();
-
 		pane.setPrefSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 		pane.setBackground(new Background(new BackgroundImage(bgImage, null, null, null, null)));
 
+		monstersTimeline.setCycleCount(Timeline.INDEFINITE);
+		monstersTimeline.play();
 		createMonsters();
 
-		// Bottom trees
-		Sprite trees = new Sprite("fxgame/images/skeletonsptrees.png", 640, 120);
-		trees.setCBox(0, 92, trees.getWidth(), trees.getHeight() - 92);
+		Sprite sign = new Sign();
+		sign.setPos(126, 252);
+		sprites.add(sign);
+
+		InteractionBox readSign = new InteractionBox(
+			new Rectangle2D(136, 292, 20, 2), KeyCode.UP,
+			"World expansion coming soon!"
+		);
+		interactions.add(readSign);
+
+		Sprite trees = new Sprite("fxgame/images/rightclifftrees.png", 640, 120);
+		trees.setCBox(0, 52, trees.getWidth(), trees.getHeight() - 52);
 		trees.setPos(0, 360);
 		sprites.add(trees);
 
-		pane.getChildren().add(trees.getImageView());
+		pane.getChildren().addAll(sign.getImageView(), trees.getImageView());
 
-		// Wooden boards
-		obstacles.add(new Rectangle2D(448, 82, 80, 50));
+		// Top left trees
+		obstacles.add(new Rectangle2D(0, 0, 91, 188));
+		obstacles.add(new Rectangle2D(0, 188, 57, 38));
 
-		// Top trees
-		obstacles.add(new Rectangle2D(0, 0, Game.WINDOW_WIDTH, 108));
-		obstacles.add(new Rectangle2D(0, 108, 392, 44));
-		obstacles.add(new Rectangle2D(0, 152, 352, 40));
-		obstacles.add(new Rectangle2D(0, 192, 312, 40));
-		obstacles.add(new Rectangle2D(0, 232, 272, 40));
-		obstacles.add(new Rectangle2D(132, 272, 102, 40));
-		obstacles.add(new Rectangle2D(536, 108, 102, 40));
-		obstacles.add(new Rectangle2D(574, 148, 66, 40));
-		obstacles.add(new Rectangle2D(614, 188, 26, 38));
+		// Top behind cliff
+		obstacles.add(new Rectangle2D(96, 0, 18, 80));
+		obstacles.add(new Rectangle2D(114, 0, 16, 92));
+		obstacles.add(new Rectangle2D(120, 0, 510, 102));
 
-		Text ellipsis = new Text("...");
-		ellipsis.setFont(Font.loadFont(SkeletonsPane.class.getResourceAsStream("fonts/DTM-Mono.otf"), 26));
-		ellipsis.setLineSpacing(6);
-		Text text = new Text("Found a fishing rod!");
-		text.setFont(Font.loadFont(SkeletonsPane.class.getResourceAsStream("fonts/DTM-Mono.otf"), 26));
-		text.setLineSpacing(6);
-		InteractionBox woodenBoards = new InteractionBox(
-			new Rectangle2D(466, 136, 44, 2), KeyCode.UP,
-			ellipsis, text
-		);
-		interactions.add(woodenBoards);
+		// Right side of cliff
+		obstacles.add(new Rectangle2D(548, 110, 10, 6));
+		obstacles.add(new Rectangle2D(562, 116, 86, 16));
+		obstacles.add(new Rectangle2D(572, 132, 76, 8));
+		obstacles.add(new Rectangle2D(582, 140, 66, 22));
+		obstacles.add(new Rectangle2D(610, 0, 40, 480));
 
-		// Bottom trees
-		obstacles.add(new Rectangle2D(138, 412, 76, 40));
-		obstacles.add(new Rectangle2D(538, 412, 102, 40));
+		// Bottom edge of cliff
+		obstacles.add(new Rectangle2D(568, 358, 8, 122));
+		obstacles.add(new Rectangle2D(576, 352, 12, 128));
+		obstacles.add(new Rectangle2D(588, 340, 8, 140));
+		obstacles.add(new Rectangle2D(596, 334, 10, 146));
+		obstacles.add(new Rectangle2D(606, 324, 8, 156));
 
-		exits.put(KeyCode.LEFT, GameState.FORKED_PATH);
-		exits.put(KeyCode.RIGHT, GameState.RIGHT_CLIFF);
+		exits.put(KeyCode.LEFT, GameState.SKELETONS);
 	}
 
 	public static Pane getPane() {
@@ -110,22 +108,18 @@ public class SkeletonsPane {
 		fadeTransition.setFromValue(0.0);
 		fadeTransition.setToValue(1.0);
 
-		if (Game.getCurrentState() == GameState.FORKED_PATH)
-			player.setXPos(-Controller.OFFSCREEN_X);
-		else if (Game.getCurrentState() == GameState.RIGHT_CLIFF)
-			player.setXPos(Game.WINDOW_WIDTH - Controller.OFFSCREEN_X + 10);
-
-		pane.getChildren().add(player.getImageView());
+		player.setXPos(-Controller.OFFSCREEN_X);
 
 		for (Sprite monster : monsters) {
 			if (!pane.getChildren().contains(monster.getImageView()))
 				pane.getChildren().add(monster.getImageView());
 		}
-
 		initMonsterPos();
 
+		pane.getChildren().add(player.getImageView());
+
 		Game.getPlayerController().setVals(pane, sprites, monsters, obstacles, interactions, exits);
-		Game.setCurrentState(GameState.SKELETONS);
+		Game.setCurrentState(GameState.RIGHT_CLIFF);
 
 		fadeTransition.play();
 
@@ -134,7 +128,7 @@ public class SkeletonsPane {
 
 	// Initialize monsters and set their initial positions on the pane
 	private static void createMonsters() {
-		for (int i = 1; i <= 5; i++) {
+		for (int i = 1; i <= 2; i++) {
 			Skeleton skeleton = new Skeleton();
 			pane.getChildren().add(skeleton.getImageView());
 			sprites.add(skeleton);
@@ -149,14 +143,10 @@ public class SkeletonsPane {
 		for (AnimatedSprite monster : monsters) {
 			switch (i)
 			{
-				case 1: monster.setPos(280, 300); break;
-				case 2: monster.setPos(384, 250); break;
-				case 3: monster.setPos(408, 154); break;
-				case 4: monster.setPos(468, 330); break;
-				case 5: monster.setPos(502, 210); break;
+			case 1: monster.setPos(280, 180); break;
+			case 2: monster.setPos(470, 220); break;
 			}
 			i++;
 		}
 	}
-
 }
