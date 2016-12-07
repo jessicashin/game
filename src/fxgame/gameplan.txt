@@ -20,18 +20,17 @@ thrown by snowmans. Eating wintermelons and
 fish restores Luffy's happiness. Brinn can eat
 icemelons to increase stats.
 
-RESOURCES: Fish (caught by fishing), winterfruit (found in trees),
-icemelon (found by exploring and battling), hearts (found by battling)
+RESOURCES: Fish (caught by fishing — not yet implemented), winterfruit
+(dropped by monsters), icemelon (dropped by Snowmans exclusively),
+hearts (restored by sleeping)
 
-INFORMATION: The game will feature a map of places the player has been.
-The number of lives (hearts) will be shown at all times. Player level
-will be shown, but specific player and enemy stats will be hidden.
+INFORMATION: The number of lives (hearts) will be shown at all times.
+Instructions for controls are displayed at the start of a game. Luffy's
+happiness is displayed in the interaction dialogue, quantified by hearts.
 
 SEQUENCING: The player will act in real-time, battling by moving around
 the landscape with arrow keys and attacking monsters on contact. There
-will also be an element of adventure as the player will have to search
-for hidden items (fruits) and find fishing holes to play a minigame of
-catching fish to eat.
+will also be an element of adventure as the player will have to explore.
 
 PLAYER INTERACTION: Since this is a single-player game, there is no player
 interaction. However, the player will interact with her dog Luffy in her
@@ -48,13 +47,16 @@ DESIGN OF 10 ENTITIES
 
 Brinn (player)
 Brinn is controlled by the player. She can move left, right, up, and down.
-She has a level and stats that can increase by battling monsters. Brinn
-dies when her hearts run out, resulting in losing all carried items and
-returning home where she must recover.
+Brinn dies when her hearts run out, resulting in losing all carried items
+and returning home where she must recover. She battles monsters with her
+ferocious punches.
 
 Luffy (Brinn's dog)
 Luffy is Brinn's dog. Luffy lives at home and needs to be fed. Luffy can
-eat winterfruit, fish, and icemelon.
+eat winterfruit, fish, and icemelon. Luffy follows Brinn around their
+home. Brinn can interact with Luffy. Luffy's happiness increases when
+Brinn brings food home. Luffy's happiness decreases whenever Brinn dies.
+
 
 Skeleton (monster)
 The skeleton is a monster that can move left, right, up, and down. The
@@ -71,22 +73,22 @@ Snowball (monster weapon)
 The snowball is the projectile weapon of the snowman. Getting hit by
 a snowball subtracts a heart from the player.
 
-Heart (life and item)
+Heart (life)
 The player dies and loses all the items being carried when hearts run out.
 Luffy gets sad when the player dies.
 
-Tree
-A tree is static in the landscapes. It is merely an obstacle.
-
 Winterfruit (food item)
 Winterfruit was genetically engineered in a time before The Cooling to
-withstand extreme temperatures. Skeletons and Snowmans carry these.
-
-Fish (food item)
-Fish can be caught when the player finds a fishing rod and explores to find
-fishing holes and plays a fishing minigame. Food increases happiness.
+withstand extreme temperatures. Skeletons and Snowmans drop these.
 
 Icemelon (food item)
 Icemelon was genetically engineered in a time before The Cooling to
 provide an abundance of nutrients. These days Icemelon are hard to come by,
 but sometimes Snowmans will mysteriously drop them.
+
+Sign
+A sign is static in the landscapes. The player can interact with the sign
+to read its message.
+
+Tree
+A tree is static in the landscapes. It is merely an obstacle.
