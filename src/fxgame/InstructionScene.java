@@ -29,7 +29,7 @@ public class InstructionScene {
 		luffyAnimation.setCycleCount(Animation.INDEFINITE);
 		luffyAnimation.play();
 		luffy.setX(379);
-		luffy.setY(314);
+		luffy.setY(326);
 		pane.getChildren().add(luffy);
 	}
 

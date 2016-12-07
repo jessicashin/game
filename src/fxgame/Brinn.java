@@ -1,6 +1,5 @@
 package fxgame;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class Brinn extends AnimatedSprite {
 	private int maxHearts = 3; // maxHearts will increase as player levels up
 	private int level = 1;
 
-	private List<Sprite> carriedItems = new ArrayList<Sprite>();
+	private List<Sprite> carriedItems = new LinkedList<Sprite>();
 
 
 	Brinn() {
@@ -152,8 +151,8 @@ public class Brinn extends AnimatedSprite {
 	}
 
 	public void revive() {
-		for (int i = 0; i < maxHearts; i++) {
-			this.hearts.add(new Heart());
+		while (hearts.size() < maxHearts) {
+			hearts.add(new Heart());
 		}
 	}
 
@@ -179,6 +178,10 @@ public class Brinn extends AnimatedSprite {
 
 	public void removeItem(Sprite item) {
 		carriedItems.remove(item);
+	}
+
+	public List<Sprite> getCarriedItems() {
+		return carriedItems;
 	}
 
 	public void eatItem(Sprite item) {

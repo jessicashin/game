@@ -85,15 +85,6 @@ public class Skeleton extends AnimatedSprite {
 			return fruit;
 		}
 
-		// Small chance of dropping an icemelon (rare)
-		randomChance = RANDOM.nextInt(20);
-		if (randomChance == 0) {
-			Icemelon fruit = new Icemelon();
-			fruit.setPos(getXPos() + getWidth()/2 - fruit.getWidth()/2,
-					getYPos() + getHeight() - fruit.getHeight());
-			return fruit;
-		}
-
 		return null;
 	}
 

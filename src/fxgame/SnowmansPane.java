@@ -16,6 +16,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
 
 public class SnowmansPane {
@@ -32,16 +33,39 @@ public class SnowmansPane {
 	private static final List<InteractionBox> interactions = new ArrayList<InteractionBox>();
 	private static final Map<KeyCode, GameState> exits = new HashMap<KeyCode, GameState>();
 
+	private static final AudioClip wooshSound = new AudioClip(
+		SnowmansPane.class.getResource("audio/woosh.wav").toString()
+	);
+
 	private static final Timeline monstersTimeline = new Timeline(
 		new KeyFrame(
 				Duration.ZERO, e -> {
 					for (AnimatedSprite monster : monsters) {
 						int randomDirection = RANDOM.nextInt(4);
 						switch(randomDirection) {
-							case 0: monster.walkDown(); break;
-							case 1: monster.walkUp(); break;
-							case 2: monster.walkRight(); break;
-							case 3: monster.walkLeft();
+							case 0:
+								monster.walkDown();
+								if (monster.getYPos() < Game.getPlayer().getYPos()
+										&& monster.getXPos() != -500)
+									throwSnowball((Snowman) monster);
+								break;
+							case 1:
+								monster.walkUp();
+								if (monster.getYPos() > Game.getPlayer().getYPos()
+										&& monster.getXPos() != -500)
+									throwSnowball((Snowman) monster);
+								break;
+							case 2:
+								monster.walkRight();
+								if (monster.getXPos() < Game.getPlayer().getXPos()
+										&& monster.getXPos() != -500)
+									throwSnowball((Snowman) monster);
+								break;
+							case 3:
+								monster.walkLeft();
+								if (monster.getXPos() > Game.getPlayer().getXPos()
+										&& monster.getXPos() != -500)
+									throwSnowball((Snowman) monster);
 						}
 					}
 				}
@@ -56,7 +80,6 @@ public class SnowmansPane {
 		sprites.add(player);
 
 		monstersTimeline.setCycleCount(Timeline.INDEFINITE);
-		monstersTimeline.play();
 
 		pane.setPrefSize(Game.WINDOW_WIDTH, Game.WINDOW_HEIGHT);
 		pane.setBackground(new Background(new BackgroundImage(bgImage, null, null, null, null)));
@@ -95,6 +118,7 @@ public class SnowmansPane {
 		fadeTransition.setToValue(1.0);
 
 		player.setXPos(Game.WINDOW_WIDTH - Controller.OFFSCREEN_X);
+		player.setYPos(350); //temp
 
 		pane.getChildren().add(player.getImageView());
 
@@ -104,6 +128,7 @@ public class SnowmansPane {
 		}
 
 		initMonsterPos();
+		monstersTimeline.play();
 
 		Game.getPlayerController().setVals(pane, sprites, monsters, obstacles, interactions, exits);
 		Game.setCurrentState(GameState.SNOWMANS);
@@ -115,7 +140,7 @@ public class SnowmansPane {
 
 	// Initialize monsters and set their initial positions on the pane
 	private static void createMonsters() {
-		for (int i = 1; i <= 8; i++) {
+		for (int i = 1; i <= 7; i++) {
 			Snowman snowman = new Snowman();
 			pane.getChildren().add(snowman.getImageView());
 			sprites.add(snowman);
@@ -136,11 +161,15 @@ public class SnowmansPane {
 			case 4: monster.setPos(436, 26); break;
 			case 5: monster.setPos(66, 280); break;
 			case 6: monster.setPos(198, 268); break;
-			case 7: monster.setPos(348, 358); break;
-			case 8: monster.setPos(390, 238); break;
+			case 7: monster.setPos(390, 238); break;
 			}
 			i++;
 		}
+	}
+
+	private static void throwSnowball(Snowman snowman) {
+		Game.getPlayerController().addSnowball(snowman.throwSnowball());
+		wooshSound.play();
 	}
 
 	public static InteractionBox getExitsInteractionBox() {
@@ -148,10 +177,13 @@ public class SnowmansPane {
 		return blockExits;
 	}
 
-	public static void pauseMonstersTimeline() {
+	public static void pauseTimeline() {
 		monstersTimeline.pause();
 	}
-	public static void restartMonstersTimeline() {
+	public static void stopTimeline() {
+		monstersTimeline.stop();
+	}
+	public static void restartTimeline() {
 		monstersTimeline.playFrom(Duration.millis(1900));
 	}
 

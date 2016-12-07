@@ -12,13 +12,12 @@ GAME DESIGN
 PLAYER: This is a single-player game (player vs. the game system).
 The player controls the main character Brinn throughout the game.
 
-OBJECTIVES: Brinn must collect food to feed herself and her dog.
-She must also fight monsters to protect herself when out collecting food.
+OBJECTIVES: Brinn must collect food to feed her dog.
 
 RULES: The player can move forward, backward, left, and right. The
-player must be within a small radius of a monster to attack. The
-player must dodge snowballs thrown by snowmans. Eating wintermelons and
-fish restores happiness for both Brinn and Luffy. Brinn can eat
+player can punch a monster to attack. The player must dodge snowballs
+thrown by snowmans. Eating wintermelons and
+fish restores Luffy's happiness. Brinn can eat
 icemelons to increase stats.
 
 RESOURCES: Fish (caught by fishing), winterfruit (found in trees),
@@ -59,14 +58,14 @@ eat winterfruit, fish, and icemelon.
 
 Skeleton (monster)
 The skeleton is a monster that can move left, right, up, and down. The
-player must avoid or kill skeletons to avoid losing a life. Killing
-skeletons increases experience needed to level up.
+player must avoid or kill skeletons to avoid losing a life. Skeletons
+may drop fruits when killed.
 
 Snowman (monster)
 The snowman is a monster that can move left, right, up, and down. The
 snowman will aim snowballs at the player so the player must move quickly
-to avoid getting hit and losing a life. Killing snowmans increases
-experience needed to level up.
+to avoid getting hit and losing a life. Snowmans may drop fruits when
+killed. They have a higher drop rate than Skeletons.
 
 Snowball (monster weapon)
 The snowball is the projectile weapon of the snowman. Getting hit by
@@ -74,20 +73,14 @@ a snowball subtracts a heart from the player.
 
 Heart (life and item)
 The player dies and loses all the items being carried when hearts run out.
-Monsters occasionally drop hearts when killed which can be collected to
-restore a heart. Brinn can consume a heart she is carrying at any time
-while she is not at max hearts.
+Luffy gets sad when the player dies.
 
 Tree
-A tree is static in the landscapes and the player must walk to the tree
-and search it to find any hidden winterfruit ripe for picking. New trees
-can be grown in certain spots around Brinn and Luffy's home when a
-winterfruit is planted.
+A tree is static in the landscapes. It is merely an obstacle.
 
-Winterfruit (food item and seed)
+Winterfruit (food item)
 Winterfruit was genetically engineered in a time before The Cooling to
-withstand extreme temperatures. Winterfruit can occasionally be found in
-trees. Winterfruit can be planted around the player's home to grow new trees.
+withstand extreme temperatures. Skeletons and Snowmans carry these.
 
 Fish (food item)
 Fish can be caught when the player finds a fishing rod and explores to find

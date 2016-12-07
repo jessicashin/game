@@ -12,11 +12,13 @@ import java.util.Set;
 import fxgame.Game.GameState;
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
@@ -46,6 +48,9 @@ public class Controller {
 	private static List<Rectangle2D> obstacles;
 	private static List<InteractionBox> interactions;
 	private static Map<KeyCode, GameState> exits;
+
+	private static List<Snowball> snowballs = new ArrayList<Snowball>();
+
 	private static List<Sprite> droppedItems = new ArrayList<Sprite>();
 
 	private static Pane currentModalPane = null;
@@ -83,7 +88,7 @@ public class Controller {
 			playerDamagedSound.play();
 			player.getImageView().setEffect(damageColor);
 			isDamageImmune = true;
-			player.setCBox(5, 36, 27, 19);
+			player.setCBox(6, 37, 25, 17);
 		}),
 		new KeyFrame(Duration.millis(100), e -> player.getImageView().setEffect(null)),
 		new KeyFrame(Duration.millis(200), e -> player.getImageView().setEffect(damageColor)),
@@ -99,6 +104,7 @@ public class Controller {
 	);
 
 	private static boolean foundFishingRod = false;
+	private static boolean dogSadDialogueSeen = true;
 
 	private static final AudioClip wooshSound = new AudioClip(
 		Controller.class.getResource("audio/woosh.wav").toString()
@@ -111,6 +117,10 @@ public class Controller {
 		Controller.class.getResource("audio/bop.wav").toString()
 	);
 
+	private static final AudioClip splatSound = new AudioClip(
+		Controller.class.getResource("audio/splat.wav").toString()
+	);
+
 	// How far the player can travel outside the scene (to travel to another scene)
 	public static final int OFFSCREEN_X = 19;
 	public static final int OFFSCREEN_Y = 31;
@@ -118,6 +128,7 @@ public class Controller {
 	Controller() {
 		damageColor.setSaturation(-0.6);
 		damageColor.setBrightness(-0.35);
+		splatSound.setVolume(0.5);
 
 		animationTimer = new AnimationTimer() {
 			@Override
@@ -132,6 +143,7 @@ public class Controller {
 					if (Game.getCurrentState() == GameState.ROOM && timeSinceStart > 1.6)
 						animateDog(elapsedSeconds);
 					setDogInteractionBox();
+					animateSnowballs(elapsedSeconds);
 					reorderNodes();
 				}
 				lastUpdateTime.set(timestamp);
@@ -159,6 +171,11 @@ public class Controller {
 			player.getHearts().get(i).setPos(i*25 + 20, 20);
 			pane.getChildren().add(player.getHearts().get(i).getImageView());
 		}
+	}
+
+	public void addSnowball(Snowball snowball) {
+		snowballs.add(snowball);
+		pane.getChildren().add(snowball.getImageView());
 	}
 
 	private static final Set<KeyCode> keysPressed = new HashSet<KeyCode>();
@@ -243,12 +260,7 @@ public class Controller {
 
 			GameState newScene = checkIfExit(newX, newY);
 			if (newScene != null) {
-				pane.getChildren().remove(playerPunch.getImageView());
-				for (Heart heart : player.getHearts())
-					pane.getChildren().remove(heart.getImageView());
-				for (Sprite sprite : droppedItems)
-					pane.getChildren().remove(sprite.getImageView());
-				droppedItems.clear();
+				runPaneSwitchTasks();
 				Game.setPane(newScene);
 			}
 
@@ -407,12 +419,47 @@ public class Controller {
 		}
 	}
 
+	private static void animateSnowballs(double elapsedSeconds) {
+		Iterator<Snowball> iterator = snowballs.iterator();
+		while (iterator.hasNext()) {
+			Snowball snowball = iterator.next();
+			if (pane.getChildren().contains(snowball.getImageView()))
+			if (snowball.getXPos() > -snowball.getWidth() || snowball.getXPos() < scene.getWidth() ||
+				snowball.getYPos() > -snowball.getHeight() || snowball.getYPos() < scene.getHeight()) {
+				double x = elapsedSeconds * snowball.getXVelocity() + snowball.getXPos();
+				double y = elapsedSeconds * snowball.getYVelocity() + snowball.getYPos();
+				if (checkForSnowballHit(snowball)) {
+					iterator.remove();
+				}
+				else if (!checkForObstacleCollision(snowball, x, y))
+					snowball.setPos(x, y);
+				else {
+					splatSound.play();
+					pane.getChildren().remove(snowball.getImageView());
+					snowball.setPos(-1000, -1000);
+					iterator.remove();
+				}
+			}
+			else {
+				pane.getChildren().remove(snowball.getImageView());
+				iterator.remove();
+			}
+		}
+	}
+
 	// Check if player is facing something that can be interacted with
 	private static void checkIfInteracting() {
 		for (InteractionBox box : interactions) {
 			if (player.getCBox().intersects(box.getBox()) &&
 					(player.getDirection() == box.getDirection() || box.getDirection() == KeyCode.ALL_CANDIDATES)) {
 				if (box == dog.getInteractionBox()) {
+					if (!dogSadDialogueSeen)
+						dogSadDialogueSeen = true;
+					else if (!player.getCarriedItems().isEmpty()) {
+						dog.increaseHappiness();
+						player.getCarriedItems().remove(0);
+					}
+					else dog.resetDialogue();
 					switch(player.getDirection()) {
 						case UP:	dog.setDirection(KeyCode.DOWN); break;
 						case RIGHT:	dog.setDirection(KeyCode.LEFT); break;
@@ -465,8 +512,14 @@ public class Controller {
 							case LEFT:	player.setXPos(0); break;
 							default: break;
 						}
-						SnowmansPane.restartMonstersTimeline();
+						SnowmansPane.restartTimeline();
 						animationTimer.start();
+					}
+
+					// If interacting with bed, restore player lives
+					if (Game.getCurrentState() == GameState.ROOM &&
+							box.getBox().contains(new Point2D(166, 190))) {
+						sleepFadeTransition();
 					}
 
 					currentModalPane = null;
@@ -507,7 +560,7 @@ public class Controller {
 				((y < -8 && player.isFacingUp()) ||
 				(y > scene.getHeight() - player.getHeight() + 8 && player.isFacingDown()) ||
 				(x < -6 && player.isFacingLeft()))) {
-					SnowmansPane.pauseMonstersTimeline();
+					SnowmansPane.pauseTimeline();
 					for (Sprite monster : monsters) {
 						monster.setVelocity(0, 0);
 					}
@@ -572,7 +625,7 @@ public class Controller {
 						pane.getChildren().add(((Icemelon) itemDrop).getSprite());
 					else pane.getChildren().add(itemDrop.getImageView());
 				}
-				monster.setPos(0, -200);
+				monster.setPos(-500, -500);
 			}
 		}
 	}
@@ -595,6 +648,21 @@ public class Controller {
 		return false;
 	}
 
+	private static boolean checkForSnowballHit(Snowball snowball) {
+		if (snowball.getBounds().intersects(player.getCBox()) && !isDamageImmune) {
+			pane.getChildren().remove(player.getHearts().get(player.getHearts().size()-1).getImageView());
+			snowball.setPos(-1000, -1000);
+			pane.getChildren().remove(snowball.getImageView());
+			player.loseHeart();
+			if (player.getHearts().isEmpty()) {
+				gameOver();
+				return true;
+			}
+			else damageTimeline.play();
+		}
+		return false;
+	}
+
 	private static void checkForItemCollision() {
 		Iterator<Sprite> iterator = droppedItems.iterator();
 		while (iterator.hasNext()) {
@@ -610,16 +678,50 @@ public class Controller {
 		}
 	}
 
+	private static void runPaneSwitchTasks() {
+		pane.getChildren().remove(playerPunch.getImageView());
+		for (Heart heart : player.getHearts())
+			pane.getChildren().remove(heart.getImageView());
+		for (Sprite item : droppedItems)
+			if (item instanceof Icemelon)
+				pane.getChildren().remove(((Icemelon) item).getSprite());
+			else pane.getChildren().remove(item.getImageView());
+		droppedItems.clear();
+		for (Snowball snowball : snowballs)
+			snowball.setPos(-1000, -1000);
+		if (Game.getCurrentState() == GameState.SNOWMANS)
+			SnowmansPane.stopTimeline();
+	}
+
+	private static void sleepFadeTransition() {
+		FadeTransition fadeOut = new FadeTransition(Duration.millis(400), pane);
+		fadeOut.setFromValue(1.0);
+		fadeOut.setToValue(0.0);
+		fadeOut.play();
+		FadeTransition fadeIn = new FadeTransition(Duration.millis(400), pane);
+		fadeIn.setFromValue(0.0);
+		fadeIn.setToValue(1.0);
+		Timeline delayFadeIn = new Timeline(new KeyFrame(Duration.millis(500), event -> fadeIn.play()));
+		fadeOut.setOnFinished(e -> {
+			for (Heart heart : player.getHearts())
+				pane.getChildren().remove(heart.getImageView());
+			player.revive();
+			for (int i = 0; i < player.getHearts().size(); i++) {
+				player.getHearts().get(i).setPos(i*25 + 20, 20);
+				pane.getChildren().add(player.getHearts().get(i).getImageView());
+			}
+			delayFadeIn.play();
+		});
+	}
+
 	private static void gameOver() {
 		scene.setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.ESCAPE)
 				Platform.exit();
 		});
 		player.setPos(-100, -100);
-		pane.getChildren().remove(playerPunch.getImageView());
-		for (Sprite sprite : droppedItems)
-			pane.getChildren().remove(sprite.getImageView());
-		droppedItems.clear();
+		player.getCarriedItems().clear();
+		runPaneSwitchTasks();
 		if (currentModalPane != null) {
 			for (InteractionBox box : interactions) {
 				if (box.getModalPane() == currentModalPane)
@@ -628,6 +730,8 @@ public class Controller {
 			pane.getChildren().remove(currentModalPane);
 		}
 		animationTimer.stop();
+		dog.decreaseHappiness();
+		dogSadDialogueSeen = false;
 		Game.setPane(GameState.GAME_OVER);
 		player.revive();
 	}

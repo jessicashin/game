@@ -31,10 +31,10 @@ public class Luffy extends AnimatedSprite {
 	private static final Rectangle2D layRight = new Rectangle2D(0, LAY_RIGHT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
 	private static final Rectangle2D faceFront = new Rectangle2D(0, FRONT_OFFSET_Y, SPRITE_WIDTH, SPRITE_HEIGHT);
 
-	private static final Text dialogue = new Text("Woof woof! Woof!");
-	private int happinessLevel = 3;
-	private static final int maxHappiness = 10;
-	private static final Text heartText = new Text("\u2764  \u2764  \u2764");
+	private static final Text dialogue = new Text("Woof woof! Woof!\nHungry...");
+	private int happinessLevel = 0;
+	private static final int maxHappiness = 15;
+	private static final Text heartText = new Text("\u2639"); // Start with zero hearts (sad face)
 	private final InteractionBox interactionBox = new InteractionBox(
 		new Rectangle2D(0, 0, 4, 4), KeyCode.RIGHT, dialogue, heartText
 	);
@@ -124,32 +124,48 @@ public class Luffy extends AnimatedSprite {
 	public void increaseHappiness() {
 		if (happinessLevel < maxHappiness) {
 			happinessLevel++;
-			StringBuilder sb = new StringBuilder("\u2764");
-			for (int i = 1; i < happinessLevel; i++) {
-				sb.append("  \u2764");
-			}
-			heartText.setText(sb.toString());
 		}
+		StringBuilder sb = new StringBuilder("\u2764");
+		for (int i = 1; i < happinessLevel; i++) {
+			sb.append(" \u2764");
+		}
+		if (happinessLevel == maxHappiness)
+			sb.append(" !!!");
+		interactionBox.setTexts("MMM. Yummy fruits!! THANKS", sb.toString());
 	}
 
 	public void decreaseHappiness() {
+		StringBuilder sb = new StringBuilder();
 		if (happinessLevel > 0) {
 			happinessLevel--;
 			if (happinessLevel != 0) {
-				StringBuilder sb = new StringBuilder("\u2764");
+				sb.append("\u2764");
 				for (int i = 1; i < happinessLevel; i++) {
-					sb.append("  \u2764");
+					sb.append(" \u2764");
 				}
-				heartText.setText(sb.toString());
 			}
+			sb.append(" \u2639");
 		}
-		else {
-			heartText.setText("... \u2639"); // sad face
-		}
+		else sb.append("\u2639");
+		interactionBox.setTexts("Woof woof! Woof!", sb.toString());
 	}
 
-	public void eatItem(Sprite item) {
-		// TODO: add consequence for eating
+	public void resetDialogue() {
+		if (happinessLevel > 0) {
+			StringBuilder sb = new StringBuilder("\u2764");
+			for (int i = 1; i < happinessLevel; i++) {
+				sb.append(" \u2764");
+			}
+			if (happinessLevel == maxHappiness)
+				sb.append(" !!!");
+			dialogue.setText("Woof woof! Woof!");
+			heartText.setText(sb.toString());
+		}
+		else {
+			dialogue.setText("Woof woof! Woof!\nHungry...");
+			heartText.setText("\u2639"); // sad face
+		}
+		interactionBox.setTexts(dialogue.getText(), heartText.getText());
 	}
 
 }

@@ -123,6 +123,13 @@ public class InteractionBox {
 		return typewriter;
 	}
 
+	public void setTexts(String... strings) {
+		for (int i = 0; i < animations.length; i++) {
+			animations[i].setText(strings[i]);
+			fullTexts[i] = strings[i];
+		}
+	}
+
 	public boolean isTextTimelineFinished() {
 		return animationFinished;
 	}

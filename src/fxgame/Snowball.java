@@ -9,7 +9,8 @@ public class Snowball extends Sprite {
 
 	Snowball() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT);
-		this.setSpeed(250);
+		this.setSpeed(200);
+		this.setVelocity(0, 0);
 	}
 
 }

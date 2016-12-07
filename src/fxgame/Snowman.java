@@ -1,8 +1,13 @@
 package fxgame;
 
+import java.util.Random;
+
 import javafx.geometry.Rectangle2D;
+import javafx.scene.input.KeyCode;
 
 public class Snowman extends AnimatedSprite {
+
+	private static final Random RANDOM = new Random();
 
 	private static final String IMAGE_PATH = "fxgame/images/snowman.png";
 
@@ -22,7 +27,7 @@ public class Snowman extends AnimatedSprite {
 	Snowman() {
 		super(IMAGE_PATH, SPRITE_WIDTH, SPRITE_HEIGHT);
 		this.setCBox(7, 37, 40, 36);
-		this.setSpeed(110);
+		this.setSpeed(100);
 	}
 
 
@@ -55,6 +60,7 @@ public class Snowman extends AnimatedSprite {
 		setXVelocity(0);
 		setYVelocity(getSpeed());
 		getImageView().setViewport(faceFront);
+		setDirection(KeyCode.DOWN);
 	}
 
 	@Override
@@ -62,6 +68,7 @@ public class Snowman extends AnimatedSprite {
 		setXVelocity(-getSpeed());
 		setYVelocity(0);
 		getImageView().setViewport(faceLeft);
+		setDirection(KeyCode.LEFT);
 	}
 
 	@Override
@@ -69,6 +76,7 @@ public class Snowman extends AnimatedSprite {
 		setXVelocity(0);
 		setYVelocity(-getSpeed());
 		getImageView().setViewport(faceBack);
+		setDirection(KeyCode.UP);
 	}
 
 	@Override
@@ -76,10 +84,55 @@ public class Snowman extends AnimatedSprite {
 		setXVelocity(getSpeed());
 		setYVelocity(0);
 		getImageView().setViewport(faceRight);
+		setDirection(KeyCode.RIGHT);
 	}
 
-	public void throwSnowball() {
-		// TODO
+	public Snowball throwSnowball() {
+		Snowball snowball = new Snowball();
+		switch(getDirection()) {
+			case UP:
+				snowball.setYVelocity(-snowball.getSpeed());
+				snowball.setPos(getXPos() + getWidth()/2 - snowball.getWidth()/2, getYPos() - snowball.getHeight());
+				break;
+			case RIGHT:
+				snowball.setXVelocity(snowball.getSpeed());
+				snowball.setPos(getXPos() + getWidth(), getYPos() + getHeight()/2 - snowball.getHeight()/2);
+				break;
+			case DOWN:
+				snowball.setYVelocity(snowball.getSpeed());
+				snowball.setPos(getXPos() + getWidth()/2 - snowball.getWidth()/2, getYPos() + getHeight());
+				break;
+			case LEFT:
+				snowball.setXVelocity(-snowball.getSpeed());
+				snowball.setPos(getXPos() - snowball.getWidth(), getYPos() + getHeight()/2 - snowball.getHeight()/2);
+				break;
+			default: break;
+		}
+		return snowball;
+	}
+
+	@Override
+	public Sprite itemDrop() {
+		// 50% chance of dropping a winterfruit
+		int randomChance = RANDOM.nextInt(2);
+		if (randomChance == 0) {
+			Winterfruit fruit = new Winterfruit();
+			fruit.setPos(getXPos() + getWidth()/2 - fruit.getWidth()/2,
+					getYPos() + getHeight() - fruit.getHeight());
+			return fruit;
+		}
+
+		// Lower chance of dropping an icemelon (rare)
+		// Higher drop rate than for skeleton
+		randomChance = RANDOM.nextInt(5);
+		if (randomChance == 0) {
+			Icemelon fruit = new Icemelon();
+			fruit.setPos(getXPos() + getWidth()/2 - fruit.getWidth()/2,
+					getYPos() + getHeight() - fruit.getHeight());
+			return fruit;
+		}
+
+		return null;
 	}
 
 }

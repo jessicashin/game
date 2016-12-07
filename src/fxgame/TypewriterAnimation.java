@@ -38,4 +38,8 @@ public class TypewriterAnimation extends Transition {
 		displayedText.setText("");
 	}
 
+	public void setText(String text) {
+		fullText = text;
+	}
+
 }

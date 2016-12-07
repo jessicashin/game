@@ -97,7 +97,7 @@ public class RoomPane {
 		);
 		InteractionBox bed = new InteractionBox(
 			new Rectangle2D(157, 171, 20, 36), KeyCode.ALL_CANDIDATES,
-			"Want to take a rest?"
+			"Let's take a quick rest."
 		);
 		interactions.add(bookshelf);
 		interactions.add(drawers);
