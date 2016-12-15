@@ -2,6 +2,7 @@ package fxgame;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -42,7 +43,8 @@ public class Game extends Application {
 		currentState = GameState.TITLE;
 		stage.setScene(TitleScene.getScene());
 
-		stage.setTitle("The Cooling - JavaFX Game");
+		stage.setTitle("The Cooling");
+		stage.getIcons().add(new Image("fxgame/images/icon.png"));
 		stage.getScene().setFill(Color.BLACK);
 		stage.setResizable(false);
 		stage.show();

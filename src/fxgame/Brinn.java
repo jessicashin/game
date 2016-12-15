@@ -28,7 +28,7 @@ public class Brinn extends AnimatedSprite {
 	private static final Rectangle2D punchRight = new Rectangle2D(SPRITE_WIDTH*3, SPRITE_HEIGHT*4, SPRITE_WIDTH, SPRITE_HEIGHT);
 
 	private List<Heart> hearts = new LinkedList<Heart>();
-	private int maxHearts = 3; // maxHearts will increase as player levels up
+	private int maxHearts = 4; // maxHearts will increase as player levels up
 	private int level = 1;
 
 	private List<Sprite> carriedItems = new LinkedList<Sprite>();

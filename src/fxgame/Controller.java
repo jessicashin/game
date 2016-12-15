@@ -679,6 +679,10 @@ public class Controller {
 	}
 
 	private static void runPaneSwitchTasks() {
+		FadeTransition fadeTransition = new FadeTransition(Duration.millis(200), pane);
+		fadeTransition.setFromValue(0.0);
+		fadeTransition.setToValue(1.0);
+		fadeTransition.play();
 		pane.getChildren().remove(playerPunch.getImageView());
 		for (Heart heart : player.getHearts())
 			pane.getChildren().remove(heart.getImageView());
